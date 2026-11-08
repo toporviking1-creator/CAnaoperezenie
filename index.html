@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>На опережение</title>
+<meta name="theme-color" content="#0F3D66">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Onest:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Прикроватный лист родблока: тёмно-синие «чернила» на холодной бумаге.
+     Громкие на экране только цвета пяти зон. Раскладка: одна колонка, сверху лестница зон. */
+  --bg: #EEF2F6;
+  --surface: #FFFFFF;
+  --raise: #F5F7FA;
+  --ink: #0B1726;
+  --ink-2: #26364A;
+  --line: #7F90A5;
+  --accent: #0F3D66;
+  --on-accent: #FFFFFF;
+  --focus: #1D6FD1;
+  --danger-ink: #9B1C1C;
+  --grid: #D3DAE3;
+  --info-s: #DDEBF8;
+  --zg: #1E6B3A; --zg-s: #E3F4EA;
+  --zy: #7A5A00; --zy-s: #FFF4CC;
+  --zo: #A14600; --zo-s: #FFE6D2;
+  --zr: #9B1C1C; --zr-s: #FBE4E4;
+  --zb: #1A2333; --zb-s: #E1E5EB;
+  --s-fetal: #2a78d6; --s-mat: #d55181; --s-temp: #6250d6;
+  --warn-line: #A86400; --crit-line: #B42323;
+  --font-display: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-body: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A111A; --surface: #132033; --raise: #1A2A40; --ink: #F1F5FA; --ink-2: #CAD5E2;
+    --line: #50637B; --accent: #8CC0F2; --on-accent: #06121F; --focus: #9CCBFF; --danger-ink: #FF9C9C;
+    --grid: #283A52;
+    --info-s: #16304A;
+    --zg-s: #11301F; --zy-s: #322809; --zo-s: #3A210E; --zr-s: #3C1616; --zb-s: #252F3E;
+    --zb: #3A4A60;
+    --s-fetal: #3987e5; --s-mat: #d55181; --s-temp: #9085e9;
+    --warn-line: #E2A33A; --crit-line: #F27171;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A111A; --surface: #132033; --raise: #1A2A40; --ink: #F1F5FA; --ink-2: #CAD5E2;
+  --line: #50637B; --accent: #8CC0F2; --on-accent: #06121F; --focus: #9CCBFF; --danger-ink: #FF9C9C;
+  --grid: #283A52;
+  --info-s: #16304A;
+  --zg-s: #11301F; --zy-s: #322809; --zo-s: #3A210E; --zr-s: #3C1616; --zb-s: #252F3E;
+  --zb: #3A4A60;
+  --s-fetal: #3987e5; --s-mat: #d55181; --s-temp: #9085e9;
+  --warn-line: #E2A33A; --crit-line: #F27171;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.45 var(--font-body);
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, legend { text-wrap: balance; }
+button { font-family: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.z-green { --z: var(--zg); --zs: var(--zg-s); }
+.z-yellow { --z: var(--zy); --zs: var(--zy-s); }
+.z-orange { --z: var(--zo); --zs: var(--zo-s); }
+.z-red { --z: var(--zr); --zs: var(--zr-s); }
+.z-black { --z: var(--zb); --zs: var(--zb-s); }
+
+/* ---------- Шапка ---------- */
+.top {
+  max-width: 760px; margin: 0 auto; padding: 14px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.brand h1 { font: 800 23px/1.1 var(--font-display); margin: 0; letter-spacing: -0.01em; }
+.brand p { margin: 3px 0 0; font-size: 14px; color: var(--ink-2); }
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  font: 600 15px/1.1 var(--font-body); padding: 11px 14px; min-height: 44px;
+  border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--ink-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.danger { color: var(--danger-ink); border-color: var(--danger-ink); }
+.btn.big { font-size: 18px; padding: 16px 20px; width: 100%; }
+
+/* ---------- Липкая зона: вкладки + лестница зон ---------- */
+.sticky { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+.tabs { max-width: 760px; margin: 0 auto; padding: 6px 12px 6px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.tabs a {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 42px; padding: 6px 4px; border-radius: 10px;
+  font: 600 15px/1.1 var(--font-body); color: var(--ink); text-decoration: none;
+}
+.tabs a:hover { background: var(--surface); }
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
+
+.ladder {
+  max-width: 760px; margin: 0 auto; padding: 0 12px 8px;
+  display: flex; gap: 4px; cursor: pointer;
+}
+.ladder .seg {
+  flex: 1 1 0; min-width: 0; min-height: 44px; border-radius: 8px;
+  background: var(--zs); border: 1.5px solid var(--z); color: var(--ink);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font: 700 12px/1.15 var(--font-body); padding: 4px;
+  overflow-wrap: anywhere;
+}
+.ladder .seg.on {
+  flex: 6 1 0; background: var(--z); color: #FFFFFF; justify-content: flex-start; text-align: left;
+  padding: 7px 10px; flex-direction: column; align-items: flex-start;
+}
+.ladder .seg.on b { font: 800 15px/1.15 var(--font-display); }
+.ladder .seg.on span { font: 500 13px/1.25 var(--font-body); margin-top: 2px; }
+
+/* ---------- Раскладка ---------- */
+main { max-width: 760px; margin: 0 auto; padding: 4px 16px 40px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px; margin-top: 14px;
+}
+.card h2 { font: 700 19px/1.2 var(--font-display); margin: 0 0 10px; }
+.card h3 { font: 700 16px/1.2 var(--font-display); margin: 14px 0 8px; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset + fieldset { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--grid); }
+legend { font: 700 18px/1.2 var(--font-display); padding: 0; margin-bottom: 10px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.f { display: flex; flex-direction: column; gap: 5px; font-size: 14px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.f > span { line-height: 1.25; }
+input[type="text"], input[type="datetime-local"], input[type="time"] {
+  font: 600 18px/1.2 var(--font-body); color: var(--ink); background: var(--raise);
+  border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 48px; width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+input::placeholder { color: var(--ink-2); opacity: 0.55; font-weight: 500; }
+.hint { font-size: 14px; color: var(--ink-2); margin: 8px 0 0; }
+.sub { font: 700 15px/1.2 var(--font-display); margin: 10px 0 6px; }
+.calc {
+  display: inline-block; margin-top: 8px; padding: 7px 10px; border-radius: 8px;
+  background: var(--raise); border: 1px solid var(--grid); font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 600 15px/1.2 var(--font-body); min-height: 42px; padding: 9px 13px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left;
+}
+.chip:hover { border-color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.chip[aria-pressed="true"]::before { content: "✓ "; }
+
+.segc { display: inline-flex; flex-wrap: wrap; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; align-self: flex-start; }
+.segc button {
+  font: 600 15px/1.1 var(--font-body); min-height: 44px; padding: 10px 13px; border: 0;
+  background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.segc button + button { border-left: 1.5px solid var(--line); }
+.segc button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+/* ---------- Результат мастера ---------- */
+.result { margin-top: 14px; border: 2px solid var(--z, var(--line)); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.result .rh { background: var(--z); color: #FFFFFF; padding: 12px 16px; }
+.result .rh b { display: block; font: 800 21px/1.15 var(--font-display); }
+.result .rh span { display: block; margin-top: 3px; font-size: 15px; font-weight: 500; }
+.result .rb { padding: 14px 16px 16px; }
+.result.empty { --z: var(--line); }
+.result.empty .rh { background: var(--raise); color: var(--ink); }
+.reasons { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.reasons li { background: var(--zs); border-left: 5px solid var(--z); border-radius: 6px; padding: 8px 10px; font-weight: 600; }
+.channels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.chn { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 9px; font-size: 13px; display: flex; flex-direction: column; gap: 3px; }
+.chn b { font: 700 14px/1.2 var(--font-display); }
+.chn .state { font-weight: 700; }
+.chn.on { border: 2.5px solid var(--ink); background: var(--raise); }
+.chn.on .state::before { content: "● "; }
+.chn.ex { border-style: dashed; }
+.chn .why { color: var(--ink-2); }
+.acts { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 9px 12px; margin: 0; }
+.acts dt { font: 700 15px/1.3 var(--font-display); }
+.acts dd { margin: 0; font-size: 15px; }
+.notes { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.notes li { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+.notes li b { font-weight: 700; }
+.result .go { margin-top: 14px; }
+
+.banner {
+  margin-top: 12px; padding: 10px 14px; border-radius: 10px;
+  background: var(--zy-s); border: 2px solid var(--zy); color: var(--ink); font-weight: 600;
+}
+
+/* ---------- Тренды ---------- */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; font-weight: 600; margin: 2px 0 6px; }
+.legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.chart { position: relative; margin-top: 6px; }
+.chart svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.chart .ttl { font: 700 15px/1.2 var(--font-display); margin: 10px 0 2px; }
+.tip {
+  position: absolute; top: 0; pointer-events: none; z-index: 2;
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: 8px;
+  padding: 6px 9px; font-size: 13px; line-height: 1.35; white-space: nowrap; font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.empty-chart { padding: 16px; border: 1.5px dashed var(--line); border-radius: 10px; color: var(--ink-2); font-weight: 600; }
+.tblwrap { overflow-x: auto; margin-top: 4px; }
+.tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; min-width: 560px; }
+.tbl th { text-align: left; font: 700 13px/1.2 var(--font-display); color: var(--ink); padding: 8px 6px; border-bottom: 2px solid var(--line); }
+.tbl td { padding: 8px 6px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+.tbl .d { display: block; font-size: 12px; font-weight: 700; color: var(--ink-2); }
+.tbl .hit { font-weight: 800; }
+.pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font: 700 12px/1.3 var(--font-body); background: var(--z); color: #FFFFFF; white-space: nowrap; }
+.xbtn { font: 600 13px/1 var(--font-body); padding: 7px 9px; min-height: 34px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.xbtn.arm { border-color: var(--danger-ink); color: var(--danger-ink); }
+.row-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+/* ---------- Бандл ---------- */
+.trow { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.lbl { font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.timer { font: 800 60px/1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.tbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.steps { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.step {
+  display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 10px; background: var(--surface);
+}
+.step .tgt { font: 800 14px/1.15 var(--font-display); text-align: center; color: #FFFFFF; background: var(--zr); border-radius: 8px; padding: 9px 4px; }
+.step .tx { font-weight: 600; }
+.step .st { display: block; margin-top: 3px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.step.done { background: var(--zg-s); border-color: var(--zg); }
+.step.done .tgt { background: var(--zg); }
+.step.late { border: 2.5px solid var(--zr); background: var(--zr-s); }
+.step.late .st { color: var(--ink); }
+.ongoing { margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.out { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.out li { border-left: 5px solid var(--accent); background: var(--raise); border-radius: 6px; padding: 9px 11px; font-weight: 600; }
+.out li .sm { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-top: 2px; }
+.kv { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 7px 12px; margin: 0; }
+.kv dt { font-weight: 700; }
+.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+.stopat { margin-top: 12px; padding: 12px 14px; border-radius: 10px; border: 2px solid var(--zg); background: var(--zg-s); font-weight: 700; }
+
+/* ---------- Кворум ---------- */
+.mk { display: flex; flex-direction: column; gap: 8px; }
+.mkrow { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.mkn { font: 700 16px/1.2 var(--font-display); }
+.chips.col { flex-direction: column; align-items: stretch; }
+.qgrid { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 5px; min-width: 330px; font-variant-numeric: tabular-nums; }
+.qgrid thead th:first-child, .qgrid tbody th { width: 30%; }
+.qgrid th { font: 700 14px/1.2 var(--font-display); text-align: left; padding: 6px 4px; color: var(--ink); }
+.qgrid td { padding: 11px 8px; border-radius: 8px; border: 1.5px solid var(--line); font-weight: 700; text-align: center; color: var(--ink); }
+.qgrid td.abt { background: var(--zr-s); }
+.qgrid td.wait { background: var(--zy-s); }
+.qgrid td.info { background: var(--info-s); }
+.qgrid td.here { outline: 3px solid var(--ink); outline-offset: -1px; }
+.qgrid td.here::before { content: "● "; }
+.timer.sm { font-size: 42px; }
+.tstate { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--line); font-weight: 700; }
+.tstate.due { border-color: var(--zo); background: var(--zo-s); }
+
+/* ---------- О схеме ---------- */
+.about ol, .about ul { padding-left: 22px; margin: 8px 0 0; }
+.about li { margin: 6px 0; }
+.about .refs li { font-size: 14px; }
+.zlist { list-style: none; padding: 0 !important; display: flex; flex-direction: column; gap: 8px; }
+.zlist li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: start; margin: 0 !important; }
+.zlist .pill { text-align: center; padding: 6px 8px; }
+.local { border: 2px solid var(--accent); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+footer { max-width: 760px; margin: 0 auto; padding: 0 16px 28px; font-size: 13px; color: var(--ink-2); }
+
+@media (max-width: 600px) {
+  .ladder .seg:not(.on) { flex: 0 0 22px; padding: 0; }
+  .ladder .seg:not(.on) span { display: none; }
+  .ladder .seg.on { justify-content: center; }
+  .ladder .seg.on .hd { display: none; }
+}
+@media (max-width: 380px) {
+  .channels { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .acts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .acts dt { margin-top: 8px; }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .kv dt { margin-top: 8px; }
+  .timer { font-size: 52px; }
+  .tabs a { font-size: 13px; padding: 6px 2px; }
+  .mkrow { grid-template-columns: 74px minmax(0, 1fr) auto; }
+  .step { grid-template-columns: 64px minmax(0, 1fr); }
+  .step .xbtn, .step .btn { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>На опережение</h1>
+    <p>Ведение хориоамнионита в родах: решения до температуры</p>
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="themeBtn" type="button">Тема: авто</button>
+    <button class="btn danger" id="resetAll" type="button">Новая пациентка</button>
+  </div>
+</header>
+
+<div class="sticky">
+  <nav class="tabs" aria-label="Разделы">
+    <a href="#master" data-tab="master">Мастер</a>
+    <a href="#kvorum" data-tab="kvorum">Кворум</a>
+    <a href="#trends" data-tab="trends">Тренды</a>
+    <a href="#bundle" data-tab="bundle">Бандл</a>
+    <a href="#about" data-tab="about">О схеме</a>
+  </nav>
+  <div class="ladder" id="ladder" role="button" tabindex="0" aria-label="Текущая зона — открыть мастер"></div>
+</div>
+
+<main>
+  <div class="banner" id="exampleBanner" hidden>Это пример: данные вымышленные. Чтобы вести свою пациентку, нажмите «Новая пациентка».</div>
+
+  <!-- ================= МАСТЕР ЗОН ================= -->
+  <section data-view="master" aria-label="Мастер зон">
+    <div id="result" aria-live="polite"></div>
+
+    <form class="card" id="masterForm" autocomplete="off" novalidate>
+      <fieldset>
+        <legend>Контекст</legend>
+        <div class="stack">
+          <div class="grid2">
+            <label class="f" for="m-ga"><span>Срок, недель</span>
+              <input id="m-ga" type="text" inputmode="decimal" data-k="master.ga"></label>
+            <div class="f"><span>Плодные оболочки</span>
+              <div class="segc" data-seg="master.membranes">
+                <button type="button" data-v="intact">Целы</button><button type="button" data-v="ruptured">Излились</button>
+              </div></div>
+          </div>
+          <div class="grid2" id="romBox" hidden>
+            <label class="f" for="m-rom"><span>Время излития вод</span>
+              <input id="m-rom" type="datetime-local" data-k="master.romAt"></label>
+            <div class="f"><span>Безводный период</span><output class="calc" id="romOut">—</output></div>
+          </div>
+          <div class="f"><span>Статус СГВ</span>
+            <div class="segc" data-seg="master.gbs">
+              <button type="button" data-v="pos">СГВ+</button><button type="button" data-v="neg">СГВ−</button><button type="button" data-v="unk">Неизвестен</button>
+            </div></div>
+          <div class="f"><span>Факторы риска</span>
+            <div class="chips">
+              <button class="chip" type="button" data-toggle="master.risk.mec">Мекониальные воды</button>
+              <button class="chip" type="button" data-toggle="master.risk.prolonged">Затяжные роды</button>
+              <button class="chip" type="button" data-toggle="master.risk.internal">Внутренний мониторинг</button>
+              <button class="chip" type="button" data-toggle="master.risk.gbsNoProph">СГВ+ без адекватной профилактики</button>
+              <button class="chip" type="button" data-toggle="master.risk.epiTemp">ЭА с ростом t°</button>
+            </div>
+            <p class="hint">Безводный период ≥ 12 ч и срок &lt; 37 недель учитываются автоматически.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Мать</legend>
+        <div class="stack">
+          <div class="grid2">
+            <label class="f" for="m-temp"><span>Температура, °C</span>
+              <input id="m-temp" type="text" inputmode="decimal" data-k="master.temp"></label>
+            <div class="f"><span>Динамика t°</span>
+              <div class="chips"><button class="chip" type="button" data-toggle="master.tempRising">t° растёт</button></div></div>
+            <label class="f" for="m-mhr"><span>ЧСС сейчас, уд/мин</span>
+              <input id="m-mhr" type="text" inputmode="numeric" data-k="master.mhr"></label>
+            <label class="f" for="m-mhrb"><span>Исходная ЧСС, уд/мин</span>
+              <input id="m-mhrb" type="text" inputmode="numeric" data-k="base.mhrBase"></label>
+          </div>
+          <output class="calc" id="matDelta" hidden></output>
+          <div class="f" id="recheckBox" hidden><span>Повтор t° через 30 мин</span>
+            <div class="segc" data-seg="master.recheck">
+              <button type="button" data-v="">Не было</button><button type="button" data-v="persist">≥ 38,0 °C</button><button type="button" data-v="below">&lt; 38,0 °C</button>
+            </div></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Плод (КТГ)</legend>
+        <div class="stack">
+          <div class="grid2">
+            <label class="f" for="m-fhr"><span>Базальная сейчас, уд/мин</span>
+              <input id="m-fhr" type="text" inputmode="numeric" data-k="master.fhr"></label>
+            <label class="f" for="m-fhro"><span>Собственная базальная, уд/мин</span>
+              <input id="m-fhro" type="text" inputmode="numeric" data-k="base.fhrOwn"></label>
+          </div>
+          <p class="hint">Собственная — с антенатальной КТГ или при поступлении. Сигнал — подъём больше чем на 10% без предшествующих децелераций.</p>
+          <output class="calc" id="fetDelta" hidden></output>
+          <div class="chips">
+            <button class="chip" type="button" data-toggle="master.cycLoss">Утрата цикличности</button>
+            <button class="chip" type="button" data-toggle="master.decelBefore">Подъёму предшествовали децелерации</button>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Матка и воды</legend>
+        <div class="chips">
+          <button class="chip" type="button" data-toggle="master.ut.tachy">Тахисистолия без утеротоников</button>
+          <button class="chip" type="button" data-toggle="master.ut.tender">Болезненность матки между схватками</button>
+          <button class="chip" type="button" data-toggle="master.ut.turbid">Мутные или зловонные воды</button>
+          <button class="chip" type="button" data-toggle="master.ut.mec">Густой меконий</button>
+          <button class="chip" type="button" data-toggle="master.ut.purulent">Гнойные выделения из цервикального канала</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Лаборатория</legend>
+        <div class="grid2">
+          <label class="f" for="m-wbc"><span>Лейкоциты, ×10<sup>9</sup>/л</span>
+            <input id="m-wbc" type="text" inputmode="decimal" data-k="master.wbc"></label>
+          <div class="f"><span>Влияет на лейкоциты</span>
+            <div class="chips"><button class="chip" type="button" data-toggle="master.steroids">Кортикостероиды за 72 ч</button></div></div>
+        </div>
+        <p class="hint">Лейкоциты учитываются как критерий только при t° 38,0–38,9 °C. СРБ, ПКТ и ИЛ-6 — повод для оценки, а не голос.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Признаки сепсиса</legend>
+        <div class="stack">
+          <div class="grid2">
+            <label class="f" for="m-sbp"><span>САД, мм рт. ст.</span>
+              <input id="m-sbp" type="text" inputmode="numeric" data-k="master.sbp"></label>
+            <label class="f" for="m-rr"><span>ЧДД в минуту</span>
+              <input id="m-rr" type="text" inputmode="numeric" data-k="master.rr"></label>
+            <label class="f" for="m-spo2"><span>SpO<sub>2</sub>, %</span>
+              <input id="m-spo2" type="text" inputmode="numeric" data-k="master.spo2"></label>
+            <label class="f" for="m-lac"><span>Лактат, ммоль/л</span>
+              <input id="m-lac" type="text" inputmode="decimal" data-k="master.lactate"></label>
+          </div>
+          <div class="chips"><button class="chip" type="button" data-toggle="master.mentation">Нарушение сознания</button></div>
+        </div>
+      </fieldset>
+
+      <fieldset id="alibiBox" hidden>
+        <legend>Алиби: другое объяснение сигнала</legend>
+        <p class="hint">Снимайте голос только при подтверждённом объяснении. ЭА — не алиби.</p>
+        <div id="alFetal" hidden>
+          <p class="sub">Плод</p>
+          <div class="chips">
+            <button class="chip" type="button" data-toggle="master.alibi.fMhr">На КТГ пишется пульс матери</button>
+            <button class="chip" type="button" data-toggle="master.alibi.fDrugs">β-миметики или атропин</button>
+            <button class="chip" type="button" data-toggle="master.alibi.fDehyd">Дегидратация: базальная нормализовалась после 500 мл</button>
+          </div>
+        </div>
+        <div id="alMat" hidden>
+          <p class="sub">Мать</p>
+          <div class="chips">
+            <button class="chip" type="button" data-toggle="master.alibi.mPain">Боль на пике схватки</button>
+            <button class="chip" type="button" data-toggle="master.alibi.mBleed">Кровопотеря</button>
+            <button class="chip" type="button" data-toggle="master.alibi.mHypo">Гипотензия после ЭА</button>
+            <button class="chip" type="button" data-toggle="master.alibi.mDehyd">Дегидратация: нормализовалось после 500 мл</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </section>
+
+  <!-- ================= КВОРУМ ================= -->
+  <section data-view="kvorum" aria-label="Кворум" hidden>
+    <div id="kvVerdict" aria-live="polite"></div>
+
+    <div class="card">
+      <h2>Повестка: какие маркеры повышены</h2>
+      <p class="hint" style="margin-top:0">Маркеры не голосуют — они только ставят вопрос. СРБ, лейкоциты, ПКТ, НЛИ и ИЛ-6 — один канал: системный ответ матери.</p>
+      <div class="mk" style="margin-top:12px">
+        <div class="mkrow"><label class="mkn" for="k-crp">СРБ</label><input id="k-crp" type="text" inputmode="decimal" data-k="kv.vals.crp"><button class="chip" type="button" data-toggle="kv.up.crp">Повышен</button></div>
+        <div class="mkrow"><label class="mkn" for="k-pct">ПКТ</label><input id="k-pct" type="text" inputmode="decimal" data-k="kv.vals.pct"><button class="chip" type="button" data-toggle="kv.up.pct">Повышен</button></div>
+        <div class="mkrow"><label class="mkn" for="k-wbc">Лейкоциты</label><input id="k-wbc" type="text" inputmode="decimal" data-k="master.wbc"><button class="chip" type="button" data-toggle="kv.up.wbc">Повышены</button></div>
+        <div class="mkrow"><label class="mkn" for="k-nli">НЛИ</label><input id="k-nli" type="text" inputmode="decimal" data-k="kv.vals.nli"><button class="chip" type="button" data-toggle="kv.up.nli">Повышен</button></div>
+        <div class="mkrow"><label class="mkn" for="k-il6">ИЛ-6</label><input id="k-il6" type="text" inputmode="decimal" data-k="kv.vals.il6"><button class="chip" type="button" data-toggle="kv.up.il6">Повышен</button></div>
+      </div>
+      <p class="hint">Повышен или нет — по референсу лаборатории и клинике: единых порогов для родов нет.</p>
+    </div>
+
+    <div class="card">
+      <h2>Алиби по маркеру</h2>
+      <p class="hint" style="margin-top:0">Засчитывается, только если объясняет именно этот маркер.</p>
+      <div class="chips col" style="margin-top:10px">
+        <button class="chip" type="button" data-toggle="master.steroids">Кортикостероиды за 72 ч — объясняют лейкоциты, НЛИ</button>
+        <button class="chip" type="button" data-toggle="kv.al.labor">Долгие роды, рвота, обезвоживание — лейкоциты, НЛИ</button>
+        <button class="chip" type="button" data-toggle="kv.al.crp">Преэклампсия / HELLP, ТГВ / ТЭЛА, недавняя операция — СРБ</button>
+        <button class="chip" type="button" data-toggle="kv.al.focus">Очаг вне матки: моча, лёгкие, почки, живот — любой маркер</button>
+      </div>
+      <output class="calc" id="kvAgenda"></output>
+    </div>
+
+    <div class="card">
+      <h2>Голоса</h2>
+      <p class="hint" id="kvNeed" style="margin-top:0"></p>
+      <div class="channels" id="kvVotes" style="margin-top:10px"></div>
+      <p class="hint" style="margin-top:0">Плод, мать, матка и воды — из мастера; «время» — из точки T.</p>
+      <div class="row-actions"><a class="btn" href="#master">Изменить сигналы в мастере</a></div>
+    </div>
+
+    <div class="card">
+      <h2>Сетка кворума</h2>
+      <div class="tblwrap"><table class="qgrid" id="kvGrid"></table></div>
+      <p class="hint">Голос плода достаточен при любом сроке. До 34 недель без голосов — низкий порог на информацию (амниоцентез), а не на антибиотики. Профилактика СГВ — по своим показаниям, вне «Кворума».</p>
+    </div>
+
+    <div class="card">
+      <h2>Точка T</h2>
+      <p class="hint" style="margin-top:0">Повтор — по кинетике маркера, а не «через час». За 30–60 мин повторный анализ (кроме ИЛ-6) ничего не добавит: решают алиби, плод и мать. Лейкоциты и НЛИ в родах растут физиологически — для «времени» не годятся.</p>
+      <div class="stack" style="margin-top:12px">
+        <div class="f"><span>Маркер для повтора</span>
+          <div class="segc" data-seg="kv.tMarker">
+            <button type="button" data-v="il6">ИЛ-6, 1–2 ч</button><button type="button" data-v="pct">ПКТ, 4–6 ч</button><button type="button" data-v="crp">СРБ, 6–8 ч</button>
+          </div></div>
+        <div id="kvTStart"><button class="btn primary" id="kvStartT" type="button">Начать отсчёт до точки T</button></div>
+        <div id="kvTRun" hidden>
+          <div class="trow">
+            <div><div class="lbl" id="kvTlbl"></div><div class="timer sm" id="kvTimer">00:00</div></div>
+            <button class="btn" type="button" id="kvResetT">Сбросить точку T</button>
+          </div>
+          <div class="tstate" id="kvTstate"></div>
+          <div class="f" style="margin-top:12px"><span>Маркер к точке T</span>
+            <div class="segc" data-seg="kv.tResult">
+              <button type="button" data-v="">Нет результата</button><button type="button" data-v="rose">Вырос</button><button type="button" data-v="flat">Не вырос</button>
+            </div></div>
+        </div>
+        <label class="f" for="k-plan"><span>План в точке T — записать до переноса</span><input id="k-plan" type="text" data-k="kv.plan"></label>
+        <div class="chips"><button class="chip" type="button" data-toggle="kv.deliverySoon">Роды ожидаются менее чем через 2 ч</button></div>
+      </div>
+      <p class="hint">До точки T: КТГ непрерывно с проверкой голоса плода раз в час, ЧСС и t° матери каждые 30 мин. Новый голос раньше T — пересчёт сразу.</p>
+    </div>
+
+    <div class="card">
+      <h2>Протокол «Кворум»</h2>
+      <dl class="kv" id="kvProto"></dl>
+      <div class="chips" style="margin-top:12px"><button class="chip" type="button" data-toggle="kv.placenta">Плацента на гистологию</button></div>
+    </div>
+  </section>
+
+  <!-- ================= ТРЕНДЫ ================= -->
+  <section data-view="trends" aria-label="Лист трендов" hidden>
+    <div class="card">
+      <h2>Собственная исходная</h2>
+      <div class="grid2">
+        <label class="f" for="t-fhro"><span>Базальная плода, уд/мин</span>
+          <input id="t-fhro" type="text" inputmode="numeric" data-k="base.fhrOwn"></label>
+        <label class="f" for="t-mhrb"><span>ЧСС матери, уд/мин</span>
+          <input id="t-mhrb" type="text" inputmode="numeric" data-k="base.mhrBase"></label>
+      </div>
+      <p class="hint">Те же значения, что в мастере: от них считаются Δ и сигналы.</p>
+    </div>
+
+    <div class="card">
+      <h2>Новое измерение</h2>
+      <div class="stack">
+        <div class="grid2">
+          <label class="f" for="t-time"><span>Время</span><input id="t-time" type="time"></label>
+          <label class="f" for="t-fhr"><span>Базальная плода, уд/мин</span><input id="t-fhr" type="text" inputmode="numeric"></label>
+          <label class="f" for="t-mhr"><span>ЧСС матери, уд/мин</span><input id="t-mhr" type="text" inputmode="numeric"></label>
+          <label class="f" for="t-temp"><span>Температура, °C</span><input id="t-temp" type="text" inputmode="decimal"></label>
+        </div>
+        <div class="chips">
+          <button class="chip" type="button" data-dtoggle="cyc">Утрата цикличности</button>
+          <button class="chip" type="button" data-dtoggle="dec">Подъёму предшествовали децелерации</button>
+        </div>
+        <div class="chips">
+          <button class="chip" type="button" data-dtoggle="ut.tachy">Тахисистолия</button>
+          <button class="chip" type="button" data-dtoggle="ut.tender">Болезненность матки</button>
+          <button class="chip" type="button" data-dtoggle="ut.turbid">Мутные / зловонные воды</button>
+          <button class="chip" type="button" data-dtoggle="ut.mec">Густой меконий</button>
+        </div>
+      </div>
+      <div class="row-actions"><button class="btn primary" id="addRow" type="button">Добавить измерение</button></div>
+      <p class="hint" id="addMsg" role="status"></p>
+    </div>
+
+    <div class="card">
+      <h2>Динамика</h2>
+      <div id="charts"></div>
+    </div>
+
+    <div class="card">
+      <h2>Измерения</h2>
+      <div id="tblBox"></div>
+      <div class="row-actions"><button class="btn" id="toMaster" type="button">Перенести последнее в мастер</button></div>
+    </div>
+  </section>
+
+  <!-- ================= БАНДЛ ИАИ ================= -->
+  <section data-view="bundle" aria-label="Бандл ИАИ" hidden>
+    <div class="card">
+      <h2>Бандл ИАИ</h2>
+      <div id="tStart">
+        <p class="hint" style="margin:0 0 12px">Нажмите в момент решения: от него идёт отсчёт «времени ноль».</p>
+        <button class="btn primary big" id="startBundle" type="button">Старт: время ноль</button>
+      </div>
+      <div id="tRun" hidden>
+        <div class="trow">
+          <div><div class="lbl" id="t0txt"></div><div class="timer" id="timer">00:00</div></div>
+          <div class="tbtns">
+            <button class="chip" type="button" id="soundBtn" aria-pressed="false">Звук на рубежах</button>
+            <button class="btn" type="button" id="resetBundle">Сбросить бандл</button>
+          </div>
+        </div>
+      </div>
+      <ol class="steps" id="steps"></ol>
+      <p class="ongoing">Далее: КТГ непрерывно; t° и ЧСС матери каждые 30–60 мин; держать прогресс родов.</p>
+    </div>
+
+    <div class="card">
+      <h2>Дозы</h2>
+      <div class="stack">
+        <div class="grid2">
+          <label class="f" for="b-wt"><span>Масса тела, кг</span><input id="b-wt" type="text" inputmode="decimal" data-k="bundle.dose.wt"></label>
+          <label class="f" for="b-ht"><span>Рост, см</span><input id="b-ht" type="text" inputmode="numeric" data-k="bundle.dose.ht"></label>
+        </div>
+        <div class="f"><span>Аллергия на пенициллин</span>
+          <div class="segc" data-seg="bundle.dose.allergy">
+            <button type="button" data-v="none">Нет</button><button type="button" data-v="low">Низкий риск</button><button type="button" data-v="high">Высокий риск анафилаксии</button>
+          </div></div>
+        <div class="f"><span>Режим гентамицина</span>
+          <div class="segc" data-seg="bundle.dose.gentReg">
+            <button type="button" data-v="once">5 мг/кг 1 раз в сутки</button><button type="button" data-v="tid">2 → 1,5 мг/кг каждые 8 ч</button>
+          </div></div>
+        <div class="chips"><button class="chip" type="button" data-toggle="bundle.dose.cs">Кесарево сечение</button></div>
+      </div>
+      <ul class="out" id="doseOut"></ul>
+      <p class="hint">Почечная недостаточность — коррекция гентамицина и ванкомицина по формуляру. Сверить с КР 2023 и формуляром отделения.</p>
+    </div>
+
+    <div class="card">
+      <h2>Следующие дозы</h2>
+      <div id="nextOut"></div>
+    </div>
+
+    <div class="card">
+      <h2>После родов</h2>
+      <div class="stack">
+        <div class="f"><span>Родоразрешение</span>
+          <div class="segc" data-seg="bundle.post.mode">
+            <button type="button" data-v="vag">Естественные роды</button><button type="button" data-v="cs">Кесарево сечение</button>
+          </div></div>
+        <div class="grid2">
+          <label class="f" for="p-del"><span>Время родов</span><input id="p-del" type="datetime-local" data-k="bundle.post.delivery"></label>
+          <label class="f" for="p-fev"><span>Последняя t° ≥ 38,0 °C после родов</span><input id="p-fev" type="datetime-local" data-k="bundle.post.lastFever"></label>
+        </div>
+        <div class="chips">
+          <button class="chip" type="button" data-toggle="bundle.post.bacteremia">Бактериемия (посев крови +)</button>
+          <button class="chip" type="button" data-toggle="bundle.post.persistent">Стойкая лихорадка</button>
+        </div>
+      </div>
+      <ul class="out" id="postOut"></ul>
+      <div id="stopOut"></div>
+    </div>
+
+    <div class="card">
+      <h2>Передача неонатологу</h2>
+      <dl class="kv" id="neoOut"></dl>
+    </div>
+  </section>
+
+  <!-- ================= О СХЕМЕ ================= -->
+  <section data-view="about" class="about" aria-label="О схеме" hidden>
+    <div class="card">
+      <h2>Статус</h2>
+      <p style="margin:0">Концепция для обсуждения, не валидирована. Не заменяет КР «Инфекции амниотической полости и плодных оболочек (хориоамнионит)» (2023) и протокол учреждения. Дозы — сверить с формуляром и инструкцией.</p>
+      <div class="local"><b>Локальная настройка.</b> После естественных родов при выставленном ХА антибиотики не отменяются: та же схема до 48 ч без лихорадки после родов. После кесарева сечения — не меньше: та же схема с анаэробным покрытием, тоже до 48 ч без лихорадки. ACOG (CO 712) после естественных родов дополнительных доз не требует.</div>
+    </div>
+    <div class="card">
+      <h2>Четыре правила</h2>
+      <ol>
+        <li><b>Сначала решение, потом жаропонижающее.</b> Температура — диагностический сигнал: парацетамол до решения по антибиотикам его стирает.</li>
+        <li><b>Ампициллин не ждёт гентамицин.</b> Первая доза — сразу; гентамицин — по заранее рассчитанной дозе.</li>
+        <li><b>Считаем каналы, а не маркеры.</b> СРБ, лейкоциты и ПКТ — один канал; решение по кворуму независимых сигналов.</li>
+        <li><b>Плод — первый свидетель.</b> Базальную считаем от его собственной, а не от 160.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Пять зон</h2>
+      <ul class="zlist" id="zlist"></ul>
+      <h3>Кворум — единая сетка</h3>
+      <p style="margin:0">Голос плода → антибиотики при любом сроке. До 34 недель хватает 1 голоса, с 34 недель нужно 2 голоса. Голоса: плод, мать, матка и воды, время (рост маркера к точке T).</p>
+    </div>
+    <div class="card">
+      <h2>«Кворум»: серая зона</h2>
+      <ol>
+        <li><b>Маркеры не голосуют</b> — они ставят вопрос на повестку. СРБ, лейкоциты, ПКТ, НЛИ, ИЛ-6 — один канал.</li>
+        <li><b>Алиби</b> засчитывается, только если объясняет именно этот маркер: стероиды за 72 ч и долгие роды — лейкоциты и НЛИ; преэклампсия, ТГВ, операция — СРБ; очаг вне матки — любой маркер.</li>
+        <li><b>Голоса</b> — независимые каналы: плод (решающий), мать, матка и воды, время.</li>
+        <li><b>Кворум</b> зависит от срока: до 34 нед — 1 голос, с 34 нед — 2 голоса или плод.</li>
+        <li><b>Нет кворума</b> — ждать до точки T по кинетике маркера: ИЛ-6 через 1–2 ч, ПКТ 4–6 ч, СРБ 6–8 ч. До 34 нед без голосов — амниоцентез, а не слепые антибиотики: в ORACLE II антибиотики при преждевременных родах с целыми оболочками без явной инфекции сопровождались ростом ДЦП у детей [16].</li>
+        <li>Роды ожидаются менее чем через 2 ч и кворума нет — антибиотики не начинать, только протокол.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Литература</h2>
+      <ol class="refs">
+        <li>Sukumaran S, et al. CTG changes and maternal and neonatal outcomes in chorioamnionitis and/or funisitis confirmed on histopathology. Eur J Obstet Gynecol Reprod Biol. 2021;260:183–188.</li>
+        <li>Gibbs RS, et al. A randomized trial of intrapartum versus immediate postpartum treatment of women with intra-amniotic infection. Obstet Gynecol. 1988;72(6):823–828.</li>
+        <li>Sperling RS, et al. A comparison of intrapartum versus immediate postpartum treatment of intra-amniotic infection. Obstet Gynecol. 1987;70(6):861–865.</li>
+        <li>Impey LWM, et al. Intrapartum maternal fever and neonatal acidosis as risk factors for neonatal encephalopathy. Am J Obstet Gynecol. 2008;198(1):49.e1–49.e6.</li>
+        <li>Goetzl L. Maternal fever in labor: etiologies, consequences, and clinical management. Am J Obstet Gynecol. 2023;228(5S):S1274–S1282.</li>
+        <li>Bank TC, et al. Outcomes associated with antibiotic administration for isolated maternal fever in labor. Am J Obstet Gynecol. 2021. PMID 34363779.</li>
+        <li>ACOG Clinical Practice Update: criteria for suspected diagnosis of intraamniotic infection. Obstet Gynecol. 2024;144(1):e17–e19.</li>
+        <li>SMFM Consult Series #67: Maternal sepsis. Am J Obstet Gynecol. 2023. doi:10.1016/j.ajog.2023.05.019</li>
+        <li>Goetzl L, et al. Prophylactic acetaminophen does not prevent epidural fever in nulliparous women. J Perinatol. 2004;24(8):471–475.</li>
+        <li>Sharma SK, et al. Antibiotic prophylaxis and epidural-related fever in labor: a randomized trial. Anesth Analg. 2014;118(3):604–610.</li>
+        <li>Galli L, et al. Intrapartum CTG patterns in suspected clinical and subclinical chorioamnionitis in term fetuses. J Obstet Gynaecol Res. 2019;45(12):2343–2350.</li>
+        <li>Lumbreras-Marquez MI, et al. Time to antibiotic initiation for suspected chorioamnionitis. Am J Obstet Gynecol MFM. 2023;5(4):100871.</li>
+        <li>ACOG Committee Opinion No. 712: Intrapartum management of intraamniotic infection. Obstet Gynecol. 2017;130(2):e95–e101.</li>
+        <li>Минздрав России. КР «Инфекции амниотической полости и плодных оболочек (хориоамнионит)». 2023.</li>
+        <li>Towers CV, et al. Incidence of fever in labor and risk of neonatal sepsis. Am J Obstet Gynecol. 2017;216(6):596.e1–596.e5.</li>
+        <li>Kenyon S, et al. Childhood outcomes after prescription of antibiotics to pregnant women with spontaneous preterm labour: 7-year follow-up of the ORACLE II trial. Lancet. 2008;372(9646):1319–1327.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer>«На опережение» v0.1 — концепция для обсуждения, не валидирована. Данные хранятся только на этом устройстве, без ФИО.</footer>
+
+<script>
+/* ===== Движок «На опережение» + «Кворум» (чистые функции, без DOM) ===== */
+const NA = {};
+
+NA.num = function (v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const s = String(v).trim().replace(',', '.');
+  if (s === '') return null;
+  const x = Number(s);
+  return Number.isFinite(x) ? x : null;
+};
+
+NA.fmt = function (x, d) {
+  if (x === null || x === undefined || !Number.isFinite(x)) return '—';
+  const s = d === undefined ? String(Math.round(x * 10) / 10) : x.toFixed(d);
+  return s.replace('.', ',');
+};
+
+NA.romHours = function (s, now) {
+  if (!s || s.membranes !== 'ruptured' || !s.romAt) return null;
+  const t = Date.parse(s.romAt);
+  if (!Number.isFinite(t)) return null;
+  return Math.max(0, (now - t) / 3600000);
+};
+
+NA.ZONES = ['green', 'yellow', 'orange', 'red', 'black'];
+
+NA.ZONE_INFO = {
+  green: { low: 'обычные роды', name: 'Зелёная', short: 'Зел.', sub: 'Обычные роды',
+    head: 't° каждые 4 ч. Анализы и антибиотики не нужны.' },
+  yellow: { low: 'зона риска', name: 'Жёлтая', short: 'Жёлт.', sub: 'Зона риска',
+    head: 't° и ЧСС матери каждый час, лист трендов, ОАК + СРБ как точка отсчёта.' },
+  orange: { low: 'ранний сигнал', name: 'Оранжевая', short: 'Оранж.', sub: 'Ранний сигнал',
+    head: 'Осмотр врача ≤ 30 мин, анализы сразу, поиск алиби, решение по кворуму.' },
+  red: { low: 'подозрение на ИАИ', name: 'Красная', short: 'Красн.', sub: 'Подозрение на ИАИ',
+    head: 'Бандл ИАИ: антибиотики ≤ 60 мин (цель — 30), парацетамол, неонатолог.' },
+  black: { low: 'сепсис', name: 'Чёрная', short: 'Сепсис', sub: 'Сепсис',
+    head: 'Бандл сепсиса ≤ 1 ч, 1–2 л кристаллоида при гипотензии, ОРИТ.' }
+};
+
+/* Маркеры «повестки» и какие алиби какие маркеры объясняют */
+NA.MARKERS = { crp: 'СРБ', pct: 'ПКТ', wbc: 'лейкоциты', nli: 'НЛИ', il6: 'ИЛ-6' };
+NA.ALIBI_EXPLAINS = {
+  steroids: ['wbc', 'nli'],
+  labor: ['wbc', 'nli'],
+  crp: ['crp'],
+  focus: ['crp', 'pct', 'wbc', 'nli', 'il6']
+};
+/* Кинетика: повтор не раньше min и не позже max часов */
+NA.KIN = {
+  il6: { name: 'ИЛ-6', min: 1, max: 2 },
+  pct: { name: 'ПКТ', min: 4, max: 6 },
+  crp: { name: 'СРБ', min: 6, max: 8 }
+};
+
+NA.evaluate = function (s, now) {
+  const n = NA.num;
+  const T = n(s.temp), mhr = n(s.mhr), mhrB = n(s.mhrBase), fhr = n(s.fhr), own = n(s.fhrOwn);
+  const wbc = n(s.wbc), sbp = n(s.sbp), rr = n(s.rr), spo2 = n(s.spo2), lac = n(s.lactate), ga = n(s.ga);
+  const u = s.ut || {}, a = s.alibi || {}, rk = s.risk || {};
+  const up = s.agenda || {}, am = s.alibiM || {};
+  const rom = NA.romHours(s, now);
+  const r = {
+    zone: 'green', hasData: false, sepsis: [], red: [], risk: [], notes: [], ch: {},
+    nCh: 0, quorum: false, pendingRecheck: false, feverResolved: false, feverRed: false,
+    fetalDelta: null, matDelta: null, rom: rom, feverBand: false,
+    lt34: ga !== null && ga < 34, gaKnown: ga !== null, need: 2
+  };
+  r.need = r.lt34 ? 1 : 2;
+
+  // --- Повестка (маркеры) и алиби по маркеру
+  const elevated = Object.keys(NA.MARKERS).filter(k => up[k]);
+  const explained = new Set();
+  Object.keys(NA.ALIBI_EXPLAINS).forEach(k => { if (am[k]) NA.ALIBI_EXPLAINS[k].forEach(m => explained.add(m)); });
+  r.agenda = {
+    elevated: elevated.map(k => NA.MARKERS[k]),
+    open: elevated.filter(k => !explained.has(k)).map(k => NA.MARKERS[k]),
+    explained: elevated.filter(k => explained.has(k)).map(k => NA.MARKERS[k]),
+    focus: !!am.focus
+  };
+  r.agendaOpen = r.agenda.open.length > 0;
+
+  r.hasData = [T, mhr, fhr, sbp, rr, spo2, lac, wbc, ga].some(v => v !== null) || rom !== null ||
+    Object.values(u).some(Boolean) || Object.values(rk).some(Boolean) || !!s.mentation ||
+    elevated.length > 0 || s.timeResult === 'rose';
+
+  // --- Сепсис
+  if (sbp !== null && sbp <= 90) r.sepsis.push('САД ≤ 90 мм рт. ст.');
+  if (rr !== null && rr >= 25) r.sepsis.push('ЧДД ≥ 25 в минуту');
+  if (s.mentation) r.sepsis.push('нарушение сознания');
+  if (spo2 !== null && spo2 < 95) r.sepsis.push('SpO<sub>2</sub> &lt; 95%');
+  if (lac !== null && lac >= 4) r.sepsis.push('лактат ≥ 4 ммоль/л');
+  if (lac !== null && lac >= 2 && lac < 4) {
+    r.notes.push('Лактат 2–4 ммоль/л в родах бывает физиологичным — трактовать вместе с клиникой.');
+  }
+
+  // --- Голос «плод»
+  let fRise = false, fWhy = '';
+  if (fhr !== null) {
+    if (own !== null && own > 0) {
+      r.fetalDelta = (fhr - own) / own * 100;
+      if (r.fetalDelta > 10) {
+        fRise = true;
+        fWhy = 'базальная ' + fhr + ' — на ' + NA.fmt(r.fetalDelta) + '% выше собственной (' + own + ')';
+      }
+    } else {
+      if (fhr > 160) { fRise = true; fWhy = 'базальная ' + fhr + ' > 160'; }
+      r.notes.push('Укажите собственную базальную плода: сигнал считается от неё, а не от 160.');
+    }
+  }
+  if (fRise && s.decelBefore) {
+    r.notes.push('Подъёму базальной предшествовали децелерации — это картина гипоксического стресса, а не сигнал инфекции. Оцените КТГ по гипоксии.');
+    fRise = false;
+  }
+  if (fRise && s.cycLoss) fWhy += ', утрата цикличности';
+  const fAl = !!(a.fMhr || a.fDrugs || a.fDehyd);
+  r.ch.fetal = { on: fRise && !fAl, raw: fRise, explained: fRise && fAl, why: fWhy };
+
+  // --- Голос «мать»
+  let mTachy = false;
+  const mWhy = [];
+  if (mhr !== null) {
+    if (mhrB !== null) r.matDelta = mhr - mhrB;
+    if ((mhrB !== null && mhr - mhrB >= 20) || mhr >= 100) {
+      mTachy = true;
+      mWhy.push('ЧСС ' + mhr + (mhrB !== null ? ' (' + (mhr - mhrB >= 0 ? '+' : '') + (mhr - mhrB) + ' от исходной)' : ''));
+    }
+  }
+  const feverNow = T !== null && T >= 38.0;
+  r.feverBand = T !== null && T >= 38.0 && T < 39.0;
+  let mTemp = false;
+  if (feverNow && s.recheck !== 'below') { mTemp = true; mWhy.push('t° ' + NA.fmt(T, 1)); }
+  else if (T !== null && T >= 37.5 && T < 38.0 && s.tempRising) { mTemp = true; mWhy.push('t° ' + NA.fmt(T, 1) + ' и растёт'); }
+  const tachyAl = !!(a.mPain || a.mBleed || a.mHypo || a.mDehyd);
+  const tempAl = !!a.mDehyd && !feverNow;
+  const mOn = (mTachy && !tachyAl) || (mTemp && !tempAl);
+  r.ch.maternal = { on: mOn, raw: mTachy || mTemp, explained: (mTachy || mTemp) && !mOn, why: mWhy.join(', ') };
+
+  // --- Голос «матка и воды»
+  const uW = [];
+  if (u.tachy) uW.push('тахисистолия без утеротоников');
+  if (u.tender) uW.push('болезненность матки между схватками');
+  if (u.turbid) uW.push('мутные или зловонные воды');
+  if (u.mec) uW.push('густой меконий');
+  if (u.purulent) uW.push('гнойные выделения из цервикального канала');
+  r.ch.uterine = { on: uW.length > 0, raw: uW.length > 0, explained: false, why: uW.join(', ') };
+
+  // --- Голос «время»: маркер вырос к точке T (лейкоциты и НЛИ в родах не засчитываются)
+  const tRose = s.timeResult === 'rose';
+  r.ch.time = { on: tRose, raw: tRose, explained: false, why: tRose ? 'маркер вырос к точке T' : '' };
+
+  // --- Кворум: единая сетка по сроку
+  r.nCh = ['fetal', 'maternal', 'uterine', 'time'].filter(k => r.ch[k].on).length;
+  r.quorum = r.ch.fetal.on || r.nCh >= r.need;
+
+  // --- Лихорадка (критерии ACOG)
+  if (T !== null && T >= 39.0) { r.red.push('t° ≥ 39,0 °C'); r.feverRed = true; }
+  else if (feverNow) {
+    const crit = [];
+    if ((fhr !== null && fhr > 160) || r.ch.fetal.on) crit.push('тахикардия плода');
+    if (wbc !== null && wbc > 15 && !s.steroids) crit.push('лейкоциты &gt; 15×10<sup>9</sup>/л');
+    if (u.purulent) crit.push('гнойные выделения');
+    if (crit.length) { r.red.push('t° 38,0–38,9 °C + ' + crit.join(', ')); r.feverRed = true; }
+    else if (s.recheck === 'persist') { r.red.push('t° 38,0–38,9 °C сохраняется через 30 мин'); r.feverRed = true; }
+    else if (s.recheck === 'below') r.feverResolved = true;
+    else r.pendingRecheck = true;
+  }
+  if (r.quorum) {
+    const names = [];
+    if (r.ch.fetal.on) names.push('плод');
+    if (r.ch.maternal.on) names.push('мать');
+    if (r.ch.uterine.on) names.push('матка и воды');
+    if (r.ch.time.on) names.push('время');
+    r.red.push('кворум: ' + names.join(' + ') + (!r.ch.fetal.on && r.lt34 ? ' (срок < 34 нед — достаточно 1 голоса)' : ''));
+  }
+
+  // --- Факторы риска (жёлтая зона)
+  if (rom !== null && rom >= 12) r.risk.push('безводный период ≥ 12 ч');
+  if (rk.mec) r.risk.push('мекониальные воды');
+  if (rk.prolonged) r.risk.push('затяжные роды');
+  if (rk.internal) r.risk.push('внутренний мониторинг');
+  if (rk.gbsNoProph) r.risk.push('СГВ+ без адекватной профилактики');
+  if (ga !== null && ga < 37) r.risk.push('недоношенность');
+  if (rk.epiTemp) r.risk.push('ЭА с ростом t°');
+  if (rk.epiTemp) r.notes.push('ЭА — не алиби: лихорадку на фоне ЭА ведём по тем же зонам.');
+  if (r.agenda.focus && elevated.length) r.notes.push('Очаг вне матки: лечить очаг, схема — по очагу. Голос плода продолжаем отслеживать.');
+  if (!r.gaKnown && (r.nCh >= 1 || r.agendaOpen)) r.notes.push('Срок не указан — кворум считается как при ≥ 34 нед: 2 голоса или голос плода.');
+
+  // --- Зона
+  if (r.sepsis.length) r.zone = 'black';
+  else if (r.red.length) r.zone = 'red';
+  else if (r.nCh >= 1 || r.pendingRecheck || r.feverResolved || (r.agendaOpen && s.timeResult !== 'flat')) r.zone = 'orange';
+  else if (r.risk.length) r.zone = 'yellow';
+  else r.zone = 'green';
+  return r;
+};
+
+NA.actions = function (r, s) {
+  s = s || {};
+  const A = [];
+  const add = (k, t) => A.push({ k: k, t: t });
+  switch (r.zone) {
+    case 'green':
+      add('Наблюдение', 't° каждые 4 ч.');
+      add('Анализы', 'Не нужны.');
+      add('Антибиотики', 'Не нужны. Профилактика СГВ — по своим показаниям.');
+      add('Инфузия', 'Не нужна, если пьёт.');
+      add('Парацетамол', 'Нет.');
+      break;
+    case 'yellow':
+      add('Наблюдение', 't° и ЧСС матери каждый час, лист трендов. Минимум влагалищных исследований, не допускать затяжных родов.');
+      add('Анализы', 'ОАК + СРБ один раз при входе в зону — точка отсчёта.');
+      add('Антибиотики', 'Нет. Профилактика СГВ — по своим показаниям.');
+      add('Инфузия', 'Не нужна, если пьёт. Поддерживающая — при ограничении питья или рвоте.');
+      add('Парацетамол', 'Нет: профилактически не предотвращает лихорадку при ЭА.');
+      break;
+    case 'orange':
+      add('Наблюдение', 'Осмотр врача ≤ 30 мин. КТГ непрерывно, t° и ЧСС матери каждые 30 мин.');
+      add('Анализы', 'Сразу: ОАК с формулой, СРБ (± ПКТ / ИЛ-6), ОАМ. Повтор по кинетике: ИЛ-6 через 1–2 ч, ПКТ — 4–6 ч, СРБ — не раньше 6–8 ч.');
+      if (r.pendingRecheck) add('Антибиотики', 'Изолированная t° 38,0–38,9 °C: повторить t° через 30 мин до парацетамола. Сохраняется → красная зона; ниже 38 → решение по сигналам.');
+      else if (r.feverResolved) add('Антибиотики', 'Повтор t° ниже 38 °C: решение по кворуму сигналов. Нет кворума — повтор оценки через 30–60 мин.');
+      else if (r.nCh === 0 && r.agendaOpen) {
+        add('Антибиотики', r.lt34
+          ? 'Голосов нет, срок < 34 нед: амниоцентез (если реально) или ждать до точки T. Без кворума слепые антибиотики не назначать.'
+          : 'Голосов нет: ждать до точки T по кинетике маркера (вкладка «Кворум»).');
+      } else {
+        add('Антибиотики', 'Кворума нет: повтор оценки через 30–60 мин, раньше — при новом сигнале' +
+          (r.agendaOpen ? '; точку T ставить раньше — быстрый маркер (ИЛ-6 или ПКТ).' : '.'));
+      }
+      add('Инфузия', 'При признаках дегидратации — тест: 500 мл кристаллоида за 30 мин, затем повтор ЧСС, t°, базальной. Осторожно при преэклампсии.');
+      add('Парацетамол', 'Нет, пока не принято решение по антибиотикам: он стирает температурный сигнал.');
+      if (s.deliverySoon) add('Тактика', 'Роды ожидаются менее чем через 2 ч: без кворума антибиотики не начинать — только протокол и передача неонатологу.');
+      break;
+    case 'red':
+      add('Наблюдение', 'Бандл ИАИ: зафиксировать «время ноль». КТГ непрерывно, t° и ЧСС матери каждые 30–60 мин.');
+      add('Анализы', '+ посев крови при t° ≥ 39 °C, ознобе или подозрении на сепсис — до антибиотика, но без задержки.');
+      add('Антибиотики', 'Сразу: ампициллин (или альтернатива) — без ожидания; гентамицин — не позже 60 мин, по готовому расчёту.');
+      add('Инфузия', 'Поддерживающая. Болюс 500 мл — только при тахикардии или гипотензии, с переоценкой.');
+      add('Парацетамол', '1 г в/в или внутрь сразу с антибиотиком, далее каждые 6 ч, не более 4 г/сут.');
+      add('Тактика', 'Неонатолог — сразу. ИАИ сама по себе — редкое показание к КС: держать прогресс родов. При гипоксических изменениях на КТГ порог к вмешательству ниже.');
+      break;
+    default:
+      add('Наблюдение', 'Анестезиолог-реаниматолог, ОРИТ. Мониторинг витальных функций.');
+      add('Анализы', 'Посевы (кровь, моча), лактат, ОАК, креатинин, билирубин, коагулограмма, газы крови.');
+      add('Антибиотики', 'Не позже 1 ч; расширить спектр по протоколу сепсиса (например, пиперациллин-тазобактам; при подозрении на СГА — + клиндамицин).');
+      add('Инфузия', '1–2 л сбалансированного кристаллоида в первые 3 ч при гипотензии или гипоперфузии, переоценка после каждого болюса. Норадреналин — вазопрессор 1-й линии.');
+      add('Парацетамол', '1 г в/в или внутрь, далее каждые 6 ч, не более 4 г/сут.');
+      add('Тактика', 'Источник в матке → активно вести к родоразрешению (санация очага). Источник вне матки → по акушерским показаниям.');
+  }
+  return A;
+};
+
+/* Вердикт «Кворума» для вкладки: что делать в серой зоне и где мы в сетке */
+NA.kvorum = function (r, s) {
+  s = s || {};
+  const v = { key: '', zone: 'orange', title: '', text: '', row: 'zero', col: r.lt34 ? 'lt34' : 'ge34', grid: false };
+  if (r.ch.fetal.on) v.row = 'fetal';
+  else if (r.nCh >= 2) v.row = 'two';
+  else if (r.nCh === 1) v.row = 'one';
+  const set = (key, zone, title, text, grid) => { v.key = key; v.zone = zone; v.title = title; v.text = text; v.grid = !!grid; return v; };
+  if (r.sepsis.length) return set('emergency', 'black', 'Не серая зона: признаки сепсиса', 'Протокол сепсиса, антибиотики в первый час — вкладка «Бандл».');
+  if (r.feverRed) return set('emergency', 'red', 'Не серая зона: критерии ИАИ', 'Путь Triple I: антибиотики сразу, бандл ИАИ.');
+  if (r.quorum) return set('abx', 'red', 'Кворум есть — антибиотики сейчас', 'Дальше обычный путь Triple I; родоразрешение — по акушерским показаниям.', true);
+  if (r.pendingRecheck) return set('recheck', 'orange', 'Сначала повтор t° через 30 мин', 'Изолированная t° 38,0–38,9 °C: повтор до парацетамола, затем пересчёт.');
+  if (!r.agenda.elevated.length && r.nCh === 0) return set('none', 'green', 'Повестки нет', 'Отметьте повышенные маркеры — или сигналы в мастере.');
+  if (!r.agendaOpen && r.nCh === 0) {
+    return set('explained', 'green', 'Объяснено алиби', r.agenda.focus
+      ? 'Лечить очаг, схема — по очагу. Голос плода продолжаем отслеживать.'
+      : 'Повышение маркеров объяснено: лечить причину. Голос плода продолжаем отслеживать.');
+  }
+  if (s.timeResult === 'flat' && r.nCh === 0) return set('close', 'green', 'Закрыть вопрос', 'Маркер к точке T не вырос, голосов нет: стандартное ведение родов. Профилактика СГВ — по показаниям.', true);
+  if (s.deliverySoon) return set('protocol', 'orange', 'Роды менее чем через 2 ч, кворума нет', 'Антибиотики не начинать — только протокол и передача неонатологу.', true);
+  if (r.nCh === 0) {
+    return r.lt34
+      ? set('info', 'orange', 'Амниоцентез или ждать', 'Срок < 34 нед, голосов нет: низкий порог на информацию, а не на антибиотики. Амниоцентез (если реально) или точка T.', true)
+      : set('wait', 'orange', 'Ждать до точки T', 'Голосов нет: ждать до точки T по кинетике маркера.', true);
+  }
+  return set('wait', 'orange', 'Ждать, точку T ставить раньше', 'Один голос (не плод) при сроке ≥ 34 нед: ждать; для точки T взять быстрый маркер — ИЛ-6 или ПКТ.', true);
+};
+
+NA.doses = function (d) {
+  const wt = NA.num(d.wt), ht = NA.num(d.ht);
+  const allergy = d.allergy || 'none';
+  const out = { warn: [], dw: null, ibw: null, dwLabel: '', gent: null };
+  out.abx = allergy === 'none'
+    ? { id: 'amp', name: 'Ампициллин', dose: '2 г в/в', every: 6, line: 'Ампициллин 2 г в/в каждые 6 ч' }
+    : allergy === 'low'
+      ? { id: 'cef', name: 'Цефазолин', dose: '2 г в/в', every: 8, line: 'Цефазолин 2 г в/в каждые 8 ч' }
+      : { id: 'cli', name: 'Клиндамицин', dose: '900 мг в/в', every: 8, line: 'Клиндамицин 900 мг в/в каждые 8 ч (или ванкомицин 1 г в/в каждые 12 ч)' };
+  if (wt !== null && ht !== null && ht >= 120 && ht <= 220) {
+    const ibw = 45.5 + 0.9055 * (ht - 152.4);
+    out.ibw = ibw;
+    if (wt < ibw) { out.dw = wt; out.dwLabel = 'фактическая масса: она меньше идеальной'; }
+    else if (wt > 1.2 * ibw) { out.dw = ibw + 0.4 * (wt - ibw); out.dwLabel = 'скорректированная масса: фактическая > 120% идеальной'; }
+    else { out.dw = ibw; out.dwLabel = 'идеальная масса'; }
+  } else if (wt !== null) {
+    out.warn.push('Для гентамицина нужен рост: доза считается по идеальной массе (при ожирении — по скорректированной).');
+  }
+  const r10 = x => Math.round(x / 10) * 10;
+  if (out.dw !== null) {
+    if ((d.gentReg || 'once') === 'once') {
+      out.gent = { every: 24, line: 'Гентамицин ' + r10(5 * out.dw) + ' мг в/в 1 раз в 24 ч', calc: '5 мг/кг × ' + NA.fmt(out.dw, 1) + ' кг' };
+    } else {
+      out.gent = { every: 8, line: 'Гентамицин: нагрузка ' + r10(2 * out.dw) + ' мг, затем ' + r10(1.5 * out.dw) + ' мг в/в каждые 8 ч', calc: '2 и 1,5 мг/кг × ' + NA.fmt(out.dw, 1) + ' кг' };
+    }
+  }
+  if (wt !== null && wt < 50) {
+    const one = Math.round(15 * wt / 50) * 50;
+    out.para = { every: 6, line: 'Парацетамол ' + one + ' мг (15 мг/кг) каждые 6 ч, не более ' + Math.round(60 * wt / 50) * 50 + ' мг/сут' };
+  } else {
+    out.para = { every: 6, line: 'Парацетамол 1 г в/в или внутрь каждые 6 ч, не более 4 г/сут' };
+  }
+  out.anaerobic = d.cs
+    ? (allergy === 'high'
+      ? 'Кесарево сечение: клиндамицин уже в схеме — отдельное анаэробное покрытие не нужно.'
+      : 'Кесарево сечение: + клиндамицин 900 мг или метронидазол 500 мг в/в после пережатия пуповины.')
+    : null;
+  return out;
+};
+
+NA.nextDue = function (firstAt, everyH, now) {
+  if (!firstAt || !everyH) return null;
+  const step = everyH * 3600000;
+  let t = firstAt + step;
+  while (t <= now) t += step;
+  return t;
+};
+
+/* После родов: локальная настройка — при выставленном ХА АБ до 48 ч без лихорадки после родов
+   (и после ЕР, и после КС; для КС — не меньше, чем для ЕР) */
+NA.postpartum = function (p) {
+  const del = Date.parse(p.delivery || '');
+  const fev = Date.parse(p.lastFever || '');
+  let stopAt = null;
+  if (Number.isFinite(del)) {
+    const ref = Number.isFinite(fev) && fev > del ? fev : del;
+    stopAt = ref + 48 * 3600000;
+  }
+  const lines = [];
+  if (p.mode === 'vag') {
+    lines.push('Естественные роды при выставленном ХА: антибиотики не отменять. Та же схема до 48 ч без лихорадки после родов.');
+  } else if (p.mode === 'cs') {
+    lines.push('Кесарево сечение: та же схема + анаэробное покрытие (клиндамицин 900 мг или метронидазол 500 мг) после пережатия пуповины, до 48 ч без лихорадки после родов.');
+  }
+  if (p.bacteremia || p.persistent) {
+    lines.push('Бактериемия или стойкая лихорадка: продлить и пересмотреть схему; лихорадка после родов — по КР «Послеродовые инфекционные осложнения».');
+  }
+  lines.push('Плацента — на гистологию.');
+  return { stopAt: stopAt, lines: lines };
+};
+
+if (typeof module !== 'undefined') module.exports = NA;
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const KEY = 'naoperezhenie_v1';
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const pad = n => String(n).padStart(2, '0');
+  const hm = ts => { const d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+  const dm = ts => { const d = new Date(ts); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1); };
+  const dur = ms => { const m = Math.max(0, Math.round(ms / 60000)); const h = Math.floor(m / 60); return h ? h + ' ч ' + (m % 60) + ' мин' : m + ' мин'; };
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const toLocalInput = ts => { const d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+  function blank() {
+    return {
+      example: false,
+      base: { fhrOwn: '', mhrBase: '' },
+      master: {
+        ga: '', membranes: 'intact', romAt: '', gbs: 'unk', risk: {}, temp: '', tempRising: false,
+        recheck: '', mhr: '', fhr: '', decelBefore: false, cycLoss: false, ut: {}, wbc: '', steroids: false,
+        sbp: '', rr: '', spo2: '', lactate: '', mentation: false, alibi: {}
+      },
+      trends: [],
+      kv: {
+        vals: { crp: '', pct: '', nli: '', il6: '' },
+        up: {}, al: {}, tMarker: 'il6', tStart: null, tResult: '', tBeeped: false,
+        plan: '', deliverySoon: false, placenta: false
+      },
+      bundle: {
+        t0: null, done: {}, beeped: {}, sound: false,
+        dose: { wt: '', ht: '', allergy: 'none', gentReg: 'once', cs: false },
+        post: { mode: '', delivery: '', lastFever: '', bacteremia: false, persistent: false }
+      },
+      theme: 'auto'
+    };
+  }
+  function merge(b, s) {
+    if (!s || typeof s !== 'object') return b;
+    Object.keys(b).forEach(k => {
+      if (s[k] === undefined) return;
+      const bv = b[k];
+      if (bv && typeof bv === 'object' && !Array.isArray(bv)) {
+        b[k] = Object.keys(bv).length ? merge(bv, s[k]) : Object.assign({}, s[k]);
+      } else b[k] = s[k];
+    });
+    return b;
+  }
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* хранилище недоступно — работаем в памяти */ } }
+  let S = merge(blank(), load());
+
+  const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+  function setP(o, p, v) {
+    const ks = p.split('.'); let a = o;
+    for (let i = 0; i < ks.length - 1; i++) {
+      if (a[ks[i]] == null || typeof a[ks[i]] !== 'object') a[ks[i]] = {};
+      a = a[ks[i]];
+    }
+    a[ks[ks.length - 1]] = v;
+  }
+
+  /* ---------- Тема ---------- */
+  const hostTheme = document.documentElement.getAttribute('data-theme');
+  const THEME_TXT = { auto: 'Тема: авто', light: 'Тема: светлая', dark: 'Тема: тёмная' };
+  function applyTheme() {
+    const r = document.documentElement;
+    if (S.theme === 'light' || S.theme === 'dark') r.setAttribute('data-theme', S.theme);
+    else if (hostTheme) r.setAttribute('data-theme', hostTheme);
+    else r.removeAttribute('data-theme');
+    $('#themeBtn').textContent = THEME_TXT[S.theme] || THEME_TXT.auto;
+  }
+  $('#themeBtn').addEventListener('click', () => {
+    S.theme = S.theme === 'auto' ? 'light' : S.theme === 'light' ? 'dark' : 'auto';
+    save(); applyTheme();
+  });
+
+  /* ---------- Двойное нажатие для опасных действий ---------- */
+  function armed(btn, label, armedLabel, action) {
+    let t = null;
+    btn.addEventListener('click', () => {
+      if (btn.dataset.armed === '1') {
+        clearTimeout(t); btn.dataset.armed = ''; btn.textContent = label; action();
+      } else {
+        btn.dataset.armed = '1'; btn.textContent = armedLabel;
+        t = setTimeout(() => { btn.dataset.armed = ''; btn.textContent = label; }, 4000);
+      }
+    });
+  }
+  armed($('#resetAll'), 'Новая пациентка', 'Нажмите ещё раз — очистить всё', () => {
+    const th = S.theme; S = blank(); S.theme = th; save(); renderAll(true); location.hash = '#master';
+  });
+  armed($('#resetBundle'), 'Сбросить бандл', 'Ещё раз — сбросить', () => {
+    S.bundle.t0 = null; S.bundle.done = {}; S.bundle.beeped = {}; save(); renderBundle();
+  });
+
+  /* ---------- Привязка полей ---------- */
+  $$('[data-k]').forEach(el => {
+    el.addEventListener('input', () => { setP(S, el.dataset.k, el.value); save(); renderAll(false, el); });
+  });
+  const draft = { cyc: false, dec: false, ut: {} };
+  document.addEventListener('click', e => {
+    const tg = e.target.closest('[data-toggle]');
+    if (tg) { const p = tg.dataset.toggle; setP(S, p, !getP(S, p)); save(); renderAll(); return; }
+    const sb = e.target.closest('.segc[data-seg] button');
+    if (sb) { setP(S, sb.parentElement.dataset.seg, sb.dataset.v); save(); renderAll(); return; }
+    const dt = e.target.closest('[data-dtoggle]');
+    if (dt) { const p = dt.dataset.dtoggle; setP(draft, p, !getP(draft, p)); syncDraft(); return; }
+  });
+  $('#masterForm').addEventListener('submit', e => e.preventDefault());
+
+  function syncInputs(except) {
+    $$('[data-k]').forEach(el => {
+      if (el === except) return;
+      const v = getP(S, el.dataset.k);
+      const sv = v == null ? '' : String(v);
+      if (el.value !== sv) el.value = sv;
+    });
+    $$('[data-toggle]').forEach(el => el.setAttribute('aria-pressed', getP(S, el.dataset.toggle) ? 'true' : 'false'));
+    $$('.segc[data-seg]').forEach(g => {
+      const v = getP(S, g.dataset.seg) || '';
+      g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'));
+    });
+  }
+  function syncDraft() {
+    $$('[data-dtoggle]').forEach(el => el.setAttribute('aria-pressed', getP(draft, el.dataset.dtoggle) ? 'true' : 'false'));
+  }
+
+  /* ---------- Мастер ---------- */
+  let R = null;
+  function masterInput() {
+    return Object.assign({}, S.master, {
+      fhrOwn: S.base.fhrOwn, mhrBase: S.base.mhrBase,
+      agenda: S.kv.up, alibiM: Object.assign({}, S.kv.al, { steroids: S.master.steroids }),
+      timeResult: S.kv.tResult, deliverySoon: S.kv.deliverySoon
+    });
+  }
+  function chBox(title, c) {
+    const st = c.on ? 'on' : (c.explained ? 'ex' : 'off');
+    const txt = c.on ? 'Голос есть' : (c.explained ? 'Объяснено алиби' : 'Нет сигнала');
+    return '<div class="chn ' + st + '"><b>' + title + '</b><span class="state">' + txt + '</span>' +
+      (c.why ? '<span class="why">' + esc(c.why) + '</span>' : '') + '</div>';
+  }
+  function renderMaster() {
+    const now = Date.now();
+    R = NA.evaluate(masterInput(), now);
+    $('#romBox').hidden = S.master.membranes !== 'ruptured';
+    $('#romOut').textContent = R.rom === null ? '—' : dur(R.rom * 3600000);
+    $('#recheckBox').hidden = !R.feverBand;
+    const md = $('#matDelta');
+    md.hidden = R.matDelta === null;
+    if (R.matDelta !== null) md.textContent = 'ЧСС матери: ' + (R.matDelta >= 0 ? '+' : '') + R.matDelta + ' уд/мин от исходной (сигнал — +20 или ≥ 100)';
+    const fd = $('#fetDelta');
+    fd.hidden = R.fetalDelta === null;
+    if (R.fetalDelta !== null) fd.textContent = 'Базальная плода: ' + (R.fetalDelta >= 0 ? '+' : '') + NA.fmt(R.fetalDelta) + '% от собственной (сигнал — больше 10%)';
+    $('#alibiBox').hidden = !(R.ch.fetal.raw || R.ch.maternal.raw);
+    $('#alFetal').hidden = !R.ch.fetal.raw;
+    $('#alMat').hidden = !R.ch.maternal.raw;
+
+    const box = $('#result');
+    if (!R.hasData) {
+      box.innerHTML = '<div class="result empty"><div class="rh"><b>Зона не определена</b><span>Заполните поля ниже — зона и действия пересчитываются сразу.</span></div>' +
+        '<div class="rb"><button class="btn" type="button" id="loadExample">Показать пример</button></div></div>';
+      $('#loadExample').addEventListener('click', loadExample);
+      return;
+    }
+    const zi = NA.ZONE_INFO[R.zone];
+    const reasons = [];
+    R.sepsis.forEach(x => reasons.push('Сепсис: ' + x));
+    R.red.forEach(x => reasons.push(x));
+    if (R.zone === 'orange') {
+      if (R.agendaOpen && S.kv.tResult !== 'flat') reasons.push('Повестка: повышены ' + R.agenda.open.join(', ') + ' — нужна оценка (вкладка «Кворум»)');
+      if (R.pendingRecheck) reasons.push('Изолированная t° 38,0–38,9 °C — нужен повтор через 30 мин');
+      if (R.feverResolved) reasons.push('Повтор t° ниже 38 °C — решение по сигналам');
+      ['fetal', 'maternal', 'uterine'].forEach(k => { if (R.ch[k].on && !R.pendingRecheck) reasons.push('Ранний сигнал: ' + esc(R.ch[k].why)); });
+    }
+    if (R.zone === 'yellow') R.risk.forEach(x => reasons.push('Фактор риска: ' + x));
+    if (R.zone === 'green') reasons.push('Факторов риска и ранних сигналов нет');
+    const acts = NA.actions(R, masterInput()).map(a => '<dt>' + a.k + '</dt><dd>' + a.t + '</dd>').join('');
+    const notes = R.notes.map(n => '<li>' + n + '</li>').join('');
+    let go = '';
+    if (R.zone === 'orange') go = '<a class="btn go" href="#kvorum">Открыть «Кворум»</a>';
+    if (R.zone === 'red' || R.zone === 'black') {
+      go = S.bundle.t0
+        ? '<button class="btn primary go" type="button" id="goBundle">Открыть бандл ИАИ</button>'
+        : '<button class="btn primary go" type="button" id="goBundle">Начать бандл: время ноль сейчас</button>';
+    }
+    box.innerHTML = '<div class="result z-' + R.zone + '"><div class="rh"><b>' + zi.name + ' зона — ' + zi.low + '</b><span>' + zi.head + '</span></div>' +
+      '<div class="rb"><ul class="reasons">' + reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>' +
+      '<div class="channels">' + chBox('Плод (решающий)', R.ch.fetal) + chBox('Мать', R.ch.maternal) + chBox('Матка и воды', R.ch.uterine) + chBox('Время', R.ch.time) + '</div>' +
+      '<dl class="acts">' + acts + '</dl>' + (notes ? '<ul class="notes">' + notes + '</ul>' : '') + go + '</div></div>';
+    const gb = $('#goBundle');
+    if (gb) gb.addEventListener('click', () => { if (!S.bundle.t0) { S.bundle.t0 = Date.now(); save(); } location.hash = '#bundle'; renderBundle(); });
+  }
+
+  function renderLadder() {
+    const has = R && R.hasData;
+    $('#ladder').innerHTML = NA.ZONES.map(z => {
+      const zi = NA.ZONE_INFO[z];
+      const on = has && R.zone === z;
+      return '<div class="seg z-' + z + (on ? ' on' : '') + '">' +
+        (on ? '<b>' + zi.name + ' — ' + zi.low + '</b><span class="hd">' + zi.head + '</span>' : '<span>' + zi.short + '</span>') + '</div>';
+    }).join('');
+    $('#ladder').setAttribute('aria-label', has ? 'Текущая зона: ' + NA.ZONE_INFO[R.zone].name + '. Открыть мастер' : 'Зона не определена. Открыть мастер');
+  }
+  $('#ladder').addEventListener('click', () => { location.hash = '#master'; });
+  $('#ladder').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); location.hash = '#master'; } });
+
+  /* ---------- Кворум ---------- */
+  const KV_ROWS = [['fetal', 'Голос плода есть'], ['one', '1 голос, не плод'], ['two', '2 голоса и больше'], ['zero', '0 голосов']];
+  const KV_CELLS = {
+    fetal: { lt34: ['abt', 'АБТ'], ge34: ['abt', 'АБТ'] },
+    one: { lt34: ['abt', 'АБТ'], ge34: ['wait', 'Ждать, точку T раньше'] },
+    two: { lt34: ['abt', 'АБТ'], ge34: ['abt', 'АБТ'] },
+    zero: { lt34: ['info', 'Амниоцентез (если реально) или ждать'], ge34: ['wait', 'Ждать до точки T'] }
+  };
+  function kvT() {
+    const k = NA.KIN[S.kv.tMarker] || NA.KIN.il6;
+    if (!S.kv.tStart) return null;
+    return { k: k, at: S.kv.tStart + k.min * 3600000, end: S.kv.tStart + k.max * 3600000 };
+  }
+  function cdText(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600);
+    return (h ? h + ':' + pad(Math.floor(s / 60) % 60) : pad(Math.floor(s / 60))) + ':' + pad(s % 60);
+  }
+  function kvLive() {
+    const t = kvT();
+    if (!t) return;
+    const now = Date.now();
+    const st = $('#kvTstate');
+    if (now < t.at) {
+      $('#kvTimer').textContent = cdText(t.at - now);
+      st.className = 'tstate';
+      st.textContent = 'Повторить ' + t.k.name + ' в ' + hm(t.at) + ' (окно до ' + hm(t.end) + ').';
+    } else {
+      $('#kvTimer').textContent = '00:00';
+      st.className = 'tstate due';
+      st.textContent = 'Точка T наступила: повторите ' + t.k.name + (now <= t.end ? ' — окно до ' + hm(t.end) : ' — окно ' + t.k.min + '–' + t.k.max + ' ч прошло') + ', затем отметьте результат.';
+      if (!S.kv.tBeeped) { S.kv.tBeeped = true; save(); if (S.bundle.sound) beep(); }
+    }
+  }
+  function renderKvorum() {
+    const inp = masterInput();
+    const r = R || NA.evaluate(inp, Date.now());
+    const v = NA.kvorum(r, inp);
+    let go = '';
+    if (v.key === 'abx' || v.key === 'emergency') {
+      go = S.bundle.t0 ? '<a class="btn primary go" href="#bundle">Открыть бандл ИАИ</a>'
+        : '<button class="btn primary go" type="button" id="kvGoBundle">Начать бандл: время ноль сейчас</button>';
+    }
+    const why = [];
+    if (r.agenda.elevated.length) why.push('Повестка: ' + r.agenda.elevated.join(', ') + (r.agenda.open.length ? ' — не объяснены: ' + r.agenda.open.join(', ') : ' — все объяснены'));
+    why.push('Голосов: ' + r.nCh + (r.ch.fetal.on ? ', включая голос плода' : '') + '; нужно ' + (r.lt34 ? '1' : '2') + ' или голос плода');
+    $('#kvVerdict').innerHTML = '<div class="result z-' + v.zone + '"><div class="rh"><b>' + v.title + '</b><span>' + v.text + '</span></div>' +
+      '<div class="rb"><ul class="reasons">' + why.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' + go + '</div></div>';
+    const gb = $('#kvGoBundle');
+    if (gb) gb.addEventListener('click', () => { S.bundle.t0 = Date.now(); save(); location.hash = '#bundle'; renderAll(); });
+
+    $('#kvAgenda').textContent = !r.agenda.elevated.length ? 'Повышенных маркеров не отмечено.'
+      : 'Повышены: ' + r.agenda.elevated.join(', ') + '. ' + (r.agenda.open.length ? 'Не объяснены: ' + r.agenda.open.join(', ') + '.' : 'Все объяснены алиби.') +
+        (r.agenda.explained.length && r.agenda.open.length ? ' Объяснены: ' + r.agenda.explained.join(', ') + '.' : '');
+
+    const ga = NA.num(S.master.ga);
+    $('#kvNeed').textContent = ga === null
+      ? 'Срок не указан — считаю как с 34 недель: нужно 2 голоса или голос плода. Укажите срок в мастере.'
+      : 'Срок ' + NA.fmt(ga) + ' нед: ' + (r.lt34 ? 'для кворума хватает 1 голоса.' : 'нужно 2 голоса или голос плода.');
+    const tc = S.kv.tResult === 'flat' ? { on: false, raw: false, explained: false, why: 'маркер к точке T не вырос' } : r.ch.time;
+    $('#kvVotes').innerHTML = chBox('Плод (решающий)', r.ch.fetal) + chBox('Мать', r.ch.maternal) + chBox('Матка и воды', r.ch.uterine) + chBox('Время', tc);
+
+    let g = '<thead><tr><th>Голоса</th><th>Срок &lt; 34 нед</th><th>Срок ≥ 34 нед</th></tr></thead><tbody>';
+    KV_ROWS.forEach(rw => {
+      g += '<tr><th>' + rw[1] + '</th>';
+      ['lt34', 'ge34'].forEach(c => {
+        const cell = KV_CELLS[rw[0]][c];
+        const here = v.grid && v.row === rw[0] && v.col === c;
+        g += '<td class="' + cell[0] + (here ? ' here' : '') + '"' + (here ? ' aria-current="true"' : '') + '>' + cell[1] + '</td>';
+      });
+      g += '</tr>';
+    });
+    $('#kvGrid').innerHTML = g + '</tbody>';
+
+    const t = kvT();
+    $('#kvTStart').hidden = !!t; $('#kvTRun').hidden = !t;
+    if (t) { $('#kvTlbl').textContent = 'До точки T: ' + t.k.name + ', старт отсчёта в ' + hm(S.kv.tStart); kvLive(); }
+
+    const vals = S.kv.vals, up = S.kv.up;
+    const mk = [['crp', 'СРБ', vals.crp], ['pct', 'ПКТ', vals.pct], ['wbc', 'Лейк.', S.master.wbc], ['nli', 'НЛИ', vals.nli], ['il6', 'ИЛ-6', vals.il6]]
+      .filter(m => m[2] || up[m[0]]).map(m => m[1] + ' ' + (m[2] ? esc(m[2]) : '—') + (up[m[0]] ? ' (повышен)' : '')).join('; ') || '—';
+    const als = [S.master.steroids && 'кортикостероиды за 72 ч', S.kv.al.labor && 'долгие роды / рвота / обезвоживание',
+      S.kv.al.crp && 'преэклампсия / ТГВ / операция', S.kv.al.focus && 'очаг вне матки'].filter(Boolean).join('; ') || 'нет';
+    const votes = [r.ch.fetal.on && 'плод', r.ch.maternal.on && 'мать', r.ch.uterine.on && 'матка и воды', r.ch.time.on && 'время'].filter(Boolean);
+    const d = NA.doses(S.bundle.dose), dn = S.bundle.done;
+    const kvs = [
+      ['Повестка', mk],
+      ['Алиби', als],
+      ['Голоса', (votes.length ? votes.join(', ') : 'нет') + ' — всего ' + r.nCh + '; срок ' + (ga === null ? 'не указан' : NA.fmt(ga) + ' нед')],
+      ['Решение', v.title],
+      ['Антибиотик', dn.abx ? d.abx.name + ', первая доза в ' + hm(dn.abx) : 'не начат'],
+      ['Точка T', t ? t.k.name + ' в ' + hm(t.at) + ' (окно до ' + hm(t.end) + ')' + (S.kv.tResult ? ' — ' + (S.kv.tResult === 'rose' ? 'вырос' : 'не вырос') : '') : 'не назначена'],
+      ['План в точке T', S.kv.plan ? esc(S.kv.plan) : '—'],
+      ['Роды &lt; 2 ч', S.kv.deliverySoon ? 'да' : 'нет'],
+      ['Неонатолог', dn.neo ? 'уведомлён в ' + hm(dn.neo) : 'не отмечено (вкладка «Бандл»)'],
+      ['Плацента', S.kv.placenta ? 'на гистологию' : 'не отмечено']
+    ];
+    $('#kvProto').innerHTML = kvs.map(x => '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>').join('');
+  }
+  $('#kvStartT').addEventListener('click', () => { S.kv.tStart = Date.now(); S.kv.tResult = ''; S.kv.tBeeped = false; save(); renderAll(); });
+  armed($('#kvResetT'), 'Сбросить точку T', 'Ещё раз — сбросить', () => { S.kv.tStart = null; S.kv.tResult = ''; S.kv.tBeeped = false; save(); renderAll(); });
+
+  /* ---------- Тренды ---------- */
+  function rowsSorted() { return S.trends.slice().sort((a, b) => a.ts - b.ts); }
+  function rowEval(rows, i) {
+    const row = rows[i], prev = i > 0 ? rows[i - 1] : null;
+    const T = NA.num(row.temp), pT = prev ? NA.num(prev.temp) : null;
+    const near = prev && row.ts - prev.ts <= 75 * 60000;
+    let recheck = '';
+    if (T !== null && T >= 38 && T < 39 && pT !== null && pT >= 38 && near && row.ts - prev.ts >= 15 * 60000) recheck = 'persist';
+    const inp = {
+      temp: row.temp, tempRising: T !== null && pT !== null && T > pT, recheck: recheck,
+      mhr: row.mhr, mhrBase: S.base.mhrBase, fhr: row.fhr, fhrOwn: S.base.fhrOwn,
+      decelBefore: row.dec, cycLoss: row.cyc, ut: row.ut || {},
+      membranes: S.master.membranes, romAt: S.master.romAt, risk: S.master.risk, ga: S.master.ga
+    };
+    const r = NA.evaluate(inp, row.ts);
+    if (T !== null && T < 38 && pT !== null && pT >= 38 && pT < 39 && near && (r.zone === 'green' || r.zone === 'yellow')) {
+      r.zone = 'orange'; r.feverResolved = true;
+    }
+    return r;
+  }
+  function renderTrends() {
+    const rows = rowsSorted();
+    const box = $('#tblBox');
+    if (!rows.length) {
+      box.innerHTML = '<p class="empty-chart">Пока нет измерений. Добавьте первое — время подставится текущее.</p>';
+    } else {
+      const own = NA.num(S.base.fhrOwn), mb = NA.num(S.base.mhrBase);
+      let html = '<div class="tblwrap"><table class="tbl"><thead><tr><th>Время</th><th>Базальная плода</th><th>ЧСС матери</th><th>t°, °C</th><th>Матка / воды</th><th>Зона</th><th></th></tr></thead><tbody>';
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i], ev = rowEval(rows, i);
+        const f = NA.num(r.fhr), m = NA.num(r.mhr), t = NA.num(r.temp);
+        const fD = f !== null && own ? (f - own) / own * 100 : null;
+        const mD = m !== null && mb !== null ? m - mb : null;
+        const pT = i > 0 ? NA.num(rows[i - 1].temp) : null;
+        const u = r.ut || {};
+        const uTxt = [u.tachy && 'тахисистолия', u.tender && 'болезненность', u.turbid && 'мутные воды', u.mec && 'густой меконий'].filter(Boolean).join(', ') || '—';
+        const extra = [r.cyc && 'утрата цикличности', r.dec && 'децелерации до подъёма'].filter(Boolean).join(', ');
+        html += '<tr><td><b>' + hm(r.ts) + '</b><span class="d">' + dm(r.ts) + '</span></td>' +
+          '<td' + (fD !== null && fD > 10 && !r.dec ? ' class="hit"' : '') + '>' + (f === null ? '—' : f) + (fD !== null ? '<span class="d">' + (fD >= 0 ? '+' : '') + NA.fmt(fD) + '%</span>' : '') + (extra ? '<span class="d">' + extra + '</span>' : '') + '</td>' +
+          '<td' + (mD !== null && (mD >= 20 || m >= 100) ? ' class="hit"' : '') + '>' + (m === null ? '—' : m) + (mD !== null ? '<span class="d">' + (mD >= 0 ? '+' : '') + mD + '</span>' : '') + '</td>' +
+          '<td' + (t !== null && t >= 37.5 ? ' class="hit"' : '') + '>' + (t === null ? '—' : NA.fmt(t, 1)) + (t !== null && pT !== null ? '<span class="d">' + (t > pT ? '↑ растёт' : t < pT ? '↓' : '=') + '</span>' : '') + '</td>' +
+          '<td>' + uTxt + '</td>' +
+          '<td><span class="pill z-' + ev.zone + '">' + NA.ZONE_INFO[ev.zone].name + '</span></td>' +
+          '<td><button class="xbtn" type="button" data-del="' + r.id + '">Удалить</button></td></tr>';
+      }
+      box.innerHTML = html + '</tbody></table></div>';
+    }
+    renderCharts(rows);
+  }
+  $('#tblBox').addEventListener('click', e => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    if (b.classList.contains('arm')) {
+      S.trends = S.trends.filter(r => String(r.id) !== b.dataset.del); save(); renderTrends();
+    } else {
+      b.classList.add('arm'); b.textContent = 'Точно?';
+      setTimeout(() => { if (document.body.contains(b)) { b.classList.remove('arm'); b.textContent = 'Удалить'; } }, 4000);
+    }
+  });
+  function nowHHMM() { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  $('#addRow').addEventListener('click', () => {
+    const tv = $('#t-time').value || nowHHMM();
+    const [hh, mm] = tv.split(':').map(Number);
+    const d = new Date(); d.setHours(hh, mm, 0, 0);
+    if (d.getTime() - Date.now() > 60 * 60000) d.setDate(d.getDate() - 1);
+    const row = {
+      id: Date.now() + Math.floor(Math.random() * 1000), ts: d.getTime(),
+      fhr: $('#t-fhr').value.trim(), mhr: $('#t-mhr').value.trim(), temp: $('#t-temp').value.trim(),
+      cyc: !!draft.cyc, dec: !!draft.dec, ut: Object.assign({}, draft.ut)
+    };
+    if (!row.fhr && !row.mhr && !row.temp) { $('#addMsg').textContent = 'Введите хотя бы одно значение: базальную, ЧСС или t°.'; return; }
+    S.trends.push(row); save();
+    ['#t-fhr', '#t-mhr', '#t-temp'].forEach(s => { $(s).value = ''; });
+    draft.cyc = false; draft.dec = false; draft.ut = {}; syncDraft();
+    $('#t-time').value = nowHHMM();
+    $('#addMsg').textContent = 'Добавлено измерение ' + hm(row.ts) + '.';
+    renderTrends();
+  });
+  $('#toMaster').addEventListener('click', () => {
+    const rows = rowsSorted();
+    if (!rows.length) return;
+    const last = rows[rows.length - 1], prev = rows.length > 1 ? rows[rows.length - 2] : null;
+    const T = NA.num(last.temp), pT = prev ? NA.num(prev.temp) : null;
+    Object.assign(S.master, {
+      fhr: last.fhr, mhr: last.mhr, temp: last.temp, cycLoss: !!last.cyc, decelBefore: !!last.dec,
+      tempRising: T !== null && pT !== null && T > pT
+    });
+    S.master.ut = Object.assign({}, last.ut || {}, S.master.ut && S.master.ut.purulent ? { purulent: true } : {});
+    save(); renderAll(); location.hash = '#master';
+  });
+
+  /* Графики: одна ось на график. 1) ЧСС плода и матери, уд/мин. 2) t°, °C */
+  function renderCharts(rows) {
+    const box = $('#charts');
+    if (!rows) rows = rowsSorted();
+    if (rows.length < 2) {
+      box.innerHTML = '<p class="empty-chart">График появится после двух измерений.</p>';
+      return;
+    }
+    const own = NA.num(S.base.fhrOwn), mb = NA.num(S.base.mhrBase);
+    const hr = {
+      title: 'ЧСС плода и матери, уд/мин', unit: 'уд/мин',
+      series: [
+        { name: 'Базальная плода', short: 'плод', color: 'var(--s-fetal)', vals: rows.map(r => NA.num(r.fhr)) },
+        { name: 'ЧСС матери', short: 'мать', color: 'var(--s-mat)', vals: rows.map(r => NA.num(r.mhr)) }
+      ],
+      refs: [], fmt: v => String(Math.round(v))
+    };
+    if (own) hr.refs.push({ v: own * 1.1, label: 'плод +10%', color: 'var(--s-fetal)' });
+    if (mb !== null) hr.refs.push({ v: mb + 20, label: 'мать +20', color: 'var(--s-mat)' });
+    const tc = {
+      title: 'Температура матери, °C', unit: '°C',
+      series: [{ name: 't°', short: '', color: 'var(--s-temp)', vals: rows.map(r => NA.num(r.temp)) }],
+      refs: [{ v: 37.5, label: '37,5', color: 'var(--warn-line)' }, { v: 38.0, label: '38,0', color: 'var(--crit-line)' }],
+      fmt: v => NA.fmt(v, 1), minSpan: 1.5
+    };
+    box.innerHTML =
+      '<div class="legend"><span><i style="background:var(--s-fetal)"></i>Базальная плода</span><span><i style="background:var(--s-mat)"></i>ЧСС матери</span></div>' +
+      '<div class="chart" id="c1"><div class="ttl">' + hr.title + '</div></div>' +
+      '<div class="chart" id="c2"><div class="ttl">' + tc.title + '</div></div>';
+    drawChart($('#c1'), rows, hr);
+    drawChart($('#c2'), rows, tc);
+  }
+  function niceStep(span) {
+    const raw = span / 4, p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / p;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
+  }
+  function drawChart(host, rows, cfg) {
+    const W = 520, H = 240, m = { l: 46, r: 80, t: 14, b: 32 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const xs = rows.map(r => r.ts);
+    const x0 = xs[0], x1 = xs[xs.length - 1], span = Math.max(x1 - x0, 30 * 60000);
+    const all = [];
+    cfg.series.forEach(s => s.vals.forEach(v => { if (v !== null) all.push(v); }));
+    cfg.refs.forEach(r => all.push(r.v));
+    if (!all.length) { host.insertAdjacentHTML('beforeend', '<p class="empty-chart">Нет значений для графика.</p>'); return; }
+    let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    const minSpan = cfg.minSpan || 20;
+    if (hi - lo < minSpan) { const c = (hi + lo) / 2; lo = c - minSpan / 2; hi = c + minSpan / 2; }
+    const step = niceStep(hi - lo);
+    lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+    const X = t => m.l + (t - x0) / span * pw;
+    const Y = v => m.t + (hi - v) / (hi - lo) * ph;
+    let g = '';
+    for (let v = lo; v <= hi + 1e-9; v += step) {
+      g += '<line x1="' + m.l + '" x2="' + (m.l + pw) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--grid)" stroke-width="1"/>' +
+        '<text x="' + (m.l - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="15" fill="var(--ink-2)">' + cfg.fmt(v) + '</text>';
+    }
+    const nT = Math.min(rows.length, 5);
+    for (let i = 0; i < nT; i++) {
+      const t = x0 + span * (nT === 1 ? 0 : i / (nT - 1));
+      g += '<text x="' + X(t) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="14" fill="var(--ink-2)">' + hm(t) + '</text>';
+    }
+    cfg.refs.forEach(r => {
+      g += '<line x1="' + m.l + '" x2="' + (m.l + pw) + '" y1="' + Y(r.v) + '" y2="' + Y(r.v) + '" stroke="' + r.color + '" stroke-width="1.5" stroke-dasharray="5 4"/>' +
+        '<text x="' + (m.l + 4) + '" y="' + (Y(r.v) - 6) + '" font-size="14" font-weight="700" fill="var(--ink)">' + r.label + '</text>';
+    });
+    const ends = [];
+    cfg.series.forEach(s => {
+      const pts = [];
+      s.vals.forEach((v, i) => { if (v !== null) pts.push([X(xs[i]), Y(v), v]); });
+      if (!pts.length) return;
+      if (pts.length > 1) g += '<polyline fill="none" stroke="' + s.color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '"/>';
+      pts.forEach((p, k) => {
+        const last = k === pts.length - 1;
+        g += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (last ? 5.5 : 4) + '" fill="' + s.color + '" stroke="var(--surface)" stroke-width="2"/>';
+      });
+      const lp = pts[pts.length - 1];
+      ends.push({ y: lp[1], text: (s.short ? s.short + ' ' : '') + cfg.fmt(lp[2]) });
+    });
+    ends.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 18) ends[i].y = ends[i - 1].y + 18;
+    ends.forEach(e => {
+      g += '<text x="' + (m.l + pw + 8) + '" y="' + (e.y + 5) + '" font-size="15" font-weight="700" fill="var(--ink)">' + esc(e.text) + '</text>';
+    });
+    g += '<line class="vl" x1="0" x2="0" y1="' + m.t + '" y2="' + (m.t + ph) + '" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>' +
+      '<rect x="' + m.l + '" y="' + m.t + '" width="' + pw + '" height="' + ph + '" fill="transparent" class="hov"/>';
+    host.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(cfg.title) + '">' + g + '</svg><div class="tip" hidden></div>');
+    const svg = host.querySelector('svg'), tip = host.querySelector('.tip'), vl = svg.querySelector('.vl');
+    function show(ev) {
+      const rect = svg.getBoundingClientRect();
+      const sx = (ev.clientX - rect.left) / rect.width * W;
+      let bi = 0, bd = Infinity;
+      xs.forEach((t, i) => { const d = Math.abs(X(t) - sx); if (d < bd) { bd = d; bi = i; } });
+      const px = X(xs[bi]);
+      vl.setAttribute('x1', px); vl.setAttribute('x2', px); vl.setAttribute('visibility', 'visible');
+      tip.innerHTML = '<b>' + hm(xs[bi]) + '</b><br>' + cfg.series.map(s => s.name + ': ' + (s.vals[bi] === null ? '—' : cfg.fmt(s.vals[bi]) + ' ' + cfg.unit)).join('<br>');
+      tip.hidden = false;
+      const left = px / W * rect.width;
+      tip.style.left = Math.min(Math.max(0, left + 10), rect.width - tip.offsetWidth) + 'px';
+      tip.style.top = '28px';
+    }
+    function hide() { tip.hidden = true; vl.setAttribute('visibility', 'hidden'); }
+    const hov = svg.querySelector('.hov');
+    hov.addEventListener('pointermove', show);
+    hov.addEventListener('pointerdown', show);
+    hov.addEventListener('pointerleave', hide);
+  }
+
+  /* ---------- Бандл ---------- */
+  function stepsDef(d) {
+    return [
+      { id: 'access', tgt: 15, label: '≤ 15 мин', text: 'Венозный доступ, анализы; посев крови — при t° ≥ 39 °C, ознобе или подозрении на сепсис' },
+      { id: 'abx', tgt: 30, label: '≤ 30 мин', text: 'Первая доза: ' + d.abx.line },
+      { id: 'para', tgt: 30, label: '≤ 30 мин', text: d.para.line.replace(' каждые 6 ч', ' — первая доза').replace(/, не более.*$/, '') },
+      { id: 'gent', tgt: 60, label: '≤ 60 мин', text: d.gent ? d.gent.line : 'Гентамицин — укажите массу и рост в разделе «Дозы»' },
+      { id: 'neo', tgt: 10, label: 'Сразу', text: 'Неонатолог уведомлён: срок, безводный период, СГВ, макс. t°, препарат и время антибиотика' }
+    ];
+  }
+  let audio = null;
+  function ensureAudio() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+    } catch (e) { audio = null; }
+  }
+  function beep() {
+    try {
+      if (!audio) return;
+      const o = audio.createOscillator(), gn = audio.createGain();
+      o.frequency.value = 880; o.connect(gn); gn.connect(audio.destination);
+      const t = audio.currentTime;
+      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.35, t + 0.02); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      o.start(t); o.stop(t + 0.65);
+    } catch (e) { /* звук недоступен — остаётся визуальный сигнал */ }
+  }
+  $('#soundBtn').addEventListener('click', () => {
+    S.bundle.sound = !S.bundle.sound; if (S.bundle.sound) { ensureAudio(); beep(); }
+    save(); renderBundle();
+  });
+  $('#startBundle').addEventListener('click', () => { S.bundle.t0 = Date.now(); S.bundle.done = {}; S.bundle.beeped = {}; save(); renderBundle(); renderMaster(); });
+  $('#steps').addEventListener('click', e => {
+    const b = e.target.closest('[data-step]');
+    if (!b) return;
+    const id = b.dataset.step;
+    if (S.bundle.done[id]) delete S.bundle.done[id]; else S.bundle.done[id] = Date.now();
+    save(); renderBundle();
+  });
+
+  function timerText(now) {
+    const s = Math.max(0, Math.floor((now - S.bundle.t0) / 1000));
+    const h = Math.floor(s / 3600);
+    return (h ? h + ':' + pad(Math.floor(s / 60) % 60) : pad(Math.floor(s / 60))) + ':' + pad(s % 60);
+  }
+  function liveTick() {
+    const now = Date.now(), t0 = S.bundle.t0;
+    if (!t0) return;
+    $('#timer').textContent = timerText(now);
+    stepsDef(NA.doses(S.bundle.dose)).forEach(st => {
+      const li = document.querySelector('.step[data-id="' + st.id + '"]');
+      if (!li || S.bundle.done[st.id]) return;
+      const left = t0 + st.tgt * 60000 - now;
+      li.classList.toggle('late', left < 0);
+      li.querySelector('.st').textContent = left < 0 ? 'Просрочено на ' + dur(-left) : 'Осталось ' + dur(left);
+    });
+  }
+  function renderSteps(d) {
+    const now = Date.now(), t0 = S.bundle.t0;
+    $('#steps').innerHTML = stepsDef(d).map(s => {
+      const done = S.bundle.done[s.id];
+      let cls = '', st = '';
+      if (done) { cls = 'done'; st = 'Сделано в ' + hm(done) + (t0 ? ' (+' + dur(done - t0) + ')' : ''); }
+      else if (t0) {
+        const left = t0 + s.tgt * 60000 - now;
+        if (left < 0) { cls = 'late'; st = 'Просрочено на ' + dur(-left); }
+        else st = 'Осталось ' + dur(left);
+      } else st = 'Ждёт старта';
+      return '<li class="step ' + cls + '" data-id="' + s.id + '"><div class="tgt">' + s.label + '</div><div><span class="tx">' + s.text + '</span><span class="st">' + st + '</span></div>' +
+        '<button class="btn" type="button" data-step="' + s.id + '"' + (t0 ? '' : ' disabled') + '>' + (done ? 'Отменить' : 'Отметить') + '</button></li>';
+    }).join('');
+  }
+  function renderNext(d, now) {
+    const dn = S.bundle.done;
+    const nx = [];
+    if (dn.abx) nx.push('<li>' + d.abx.name + ': следующая в ' + hm(NA.nextDue(dn.abx, d.abx.every, now)) + '<span class="sm">Первая доза в ' + hm(dn.abx) + ', интервал ' + d.abx.every + ' ч</span></li>');
+    if (dn.gent && d.gent) nx.push('<li>Гентамицин: следующая в ' + hm(NA.nextDue(dn.gent, d.gent.every, now)) + '<span class="sm">Первая доза в ' + hm(dn.gent) + ', интервал ' + d.gent.every + ' ч</span></li>');
+    if (dn.para) nx.push('<li>Парацетамол: не раньше ' + hm(NA.nextDue(dn.para, 6, now)) + '<span class="sm">Первая доза в ' + hm(dn.para) + ', не более 4 г/сут</span></li>');
+    $('#nextOut').innerHTML = nx.length ? '<ul class="out">' + nx.join('') + '</ul>' : '<p class="hint" style="margin:0">Отметьте первые дозы в бандле — здесь появится время следующих.</p>';
+
+  }
+  function renderBundle() {
+    const now = Date.now();
+    const d = NA.doses(S.bundle.dose);
+    const run = !!S.bundle.t0;
+    $('#tStart').hidden = run; $('#tRun').hidden = !run;
+    if (run) {
+      $('#t0txt').textContent = 'Прошло с «времени ноль» (' + hm(S.bundle.t0) + ')';
+      $('#timer').textContent = timerText(now);
+    }
+    $('#soundBtn').setAttribute('aria-pressed', S.bundle.sound ? 'true' : 'false');
+    renderSteps(d);
+
+    const out = [];
+    out.push('<li>' + d.abx.line + '</li>');
+    if (d.gent) out.push('<li>' + d.gent.line + '<span class="sm">' + d.gent.calc + ' — ' + d.dwLabel + (d.ibw ? '; идеальная масса ' + NA.fmt(d.ibw, 1) + ' кг' : '') + '</span></li>');
+    else out.push('<li>Гентамицин: укажите массу и рост<span class="sm">Доза — по идеальной массе (при ожирении — по скорректированной).</span></li>');
+    out.push('<li>' + d.para.line + '</li>');
+    if (d.anaerobic) out.push('<li>' + d.anaerobic + '</li>');
+    $('#doseOut').innerHTML = out.join('');
+
+    const dn = S.bundle.done;
+    renderNext(d, now);
+
+    const p = NA.postpartum(S.bundle.post);
+    $('#postOut').innerHTML = S.bundle.post.mode ? p.lines.map(l => '<li>' + l + '</li>').join('') : '<li>Выберите способ родоразрешения.</li>';
+    $('#stopOut').innerHTML = S.bundle.post.mode && p.stopAt
+      ? '<div class="stopat">Отмена антибиотиков — не раньше ' + dm(p.stopAt) + ' в ' + hm(p.stopAt) + ', если 48 ч без лихорадки' + (S.bundle.post.bacteremia || S.bundle.post.persistent ? '. Сейчас есть основания продлить.' : '.') + '</div>'
+      : (S.bundle.post.mode ? '<p class="hint">Укажите время родов — рассчитаю, когда можно отменить.</p>' : '');
+
+    const romH = NA.romHours(S.master, now);
+    const temps = [NA.num(S.master.temp)].concat(S.trends.map(r => NA.num(r.temp))).filter(v => v !== null);
+    const tmax = temps.length ? Math.max.apply(null, temps) : null;
+    const gbsTxt = { pos: 'положительный', neg: 'отрицательный', unk: 'неизвестен' }[S.master.gbs] || 'неизвестен';
+    const delTs = Date.parse(S.bundle.post.delivery || '');
+    let abxTxt = d.abx.name + (dn.abx ? ', первая доза в ' + hm(dn.abx) : ' — не введён');
+    if (dn.abx && Number.isFinite(delTs) && delTs > dn.abx) abxTxt += '; до родов ' + dur(delTs - dn.abx);
+    const kv = [
+      ['Срок', S.master.ga ? esc(S.master.ga) + ' нед' : '—'],
+      ['Безводный период', S.master.membranes === 'ruptured' ? (romH === null ? 'время излития не указано' : dur(romH * 3600000)) : 'оболочки целы'],
+      ['СГВ', gbsTxt],
+      ['Макс. t°', tmax === null ? '—' : NA.fmt(tmax, 1) + ' °C'],
+      ['Антибиотик', abxTxt],
+      ['Гентамицин', dn.gent ? 'первая доза в ' + hm(dn.gent) : 'не введён']
+    ];
+    $('#neoOut').innerHTML = kv.map(x => '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>').join('');
+  }
+
+  /* ---------- О схеме: зоны ---------- */
+  $('#zlist').innerHTML = NA.ZONES.map(z => '<li><span class="pill z-' + z + '">' + NA.ZONE_INFO[z].name + '</span><span><b>' + NA.ZONE_INFO[z].sub + '.</b> ' + NA.ZONE_INFO[z].head + '</span></li>').join('');
+
+  /* ---------- Пример ---------- */
+  function loadExample() {
+    const now = Date.now(), H = 3600000;
+    const th = S.theme; S = blank(); S.theme = th; S.example = true;
+    S.base = { fhrOwn: '132', mhrBase: '80' };
+    Object.assign(S.master, {
+      ga: '39', membranes: 'ruptured', romAt: toLocalInput(now - 14 * H), gbs: 'unk',
+      temp: '37,8', tempRising: true, mhr: '98', fhr: '150', ut: { tachy: true }
+    });
+    const pts = [[4, '132', '80', '37,0'], [3, '134', '84', '37,1'], [2, '139', '88', '37,3'], [1, '144', '94', '37,6'], [0, '150', '98', '37,8']];
+    S.trends = pts.map((p, i) => ({ id: i + 1, ts: now - p[0] * H, fhr: p[1], mhr: p[2], temp: p[3], cyc: p[0] === 0, dec: false, ut: p[0] === 0 ? { tachy: true } : {} }));
+    S.bundle.dose = { wt: '78', ht: '166', allergy: 'none', gentReg: 'once', cs: false };
+    S.kv.vals.crp = '24'; S.kv.up = { crp: true };
+    save(); renderAll(true);
+  }
+
+  /* ---------- Маршруты и общий рендер ---------- */
+  const VIEWS = ['master', 'kvorum', 'trends', 'bundle', 'about'];
+  function route() {
+    const v = (location.hash || '#master').slice(1);
+    const cur = VIEWS.indexOf(v) >= 0 ? v : 'master';
+    $$('[data-view]').forEach(s => { s.hidden = s.dataset.view !== cur; });
+    $$('[data-tab]').forEach(a => { if (a.dataset.tab === cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (cur === 'trends') renderCharts();
+  }
+  window.addEventListener('hashchange', route);
+
+  function renderAll(full, except) {
+    syncInputs(except);
+    syncDraft();
+    $('#exampleBanner').hidden = !S.example;
+    renderMaster();
+    renderLadder();
+    renderKvorum();
+    renderTrends();
+    renderBundle();
+  }
+
+  let tickN = 0;
+  setInterval(() => {
+    tickN++;
+    if (S.kv.tStart) kvLive();
+    if (S.bundle.t0) {
+      liveTick();
+      if (S.bundle.sound) {
+        const d = NA.doses(S.bundle.dose), now = Date.now();
+        stepsDef(d).forEach(s => {
+          if (!S.bundle.done[s.id] && !S.bundle.beeped[s.id] && now >= S.bundle.t0 + s.tgt * 60000) {
+            S.bundle.beeped[s.id] = true; save(); beep();
+          }
+        });
+      }
+    }
+    if (tickN % 30 === 0) {
+      const r2 = NA.evaluate(masterInput(), Date.now());
+      if (!R || r2.zone !== R.zone || r2.risk.join() !== R.risk.join()) { renderMaster(); renderLadder(); renderKvorum(); }
+      else if (r2.rom !== null) $('#romOut').textContent = dur(r2.rom * 3600000);
+      if (S.bundle.t0) renderNext(NA.doses(S.bundle.dose), Date.now());
+    }
+  }, 1000);
+
+  $('#t-time').value = nowHHMM();
+  applyTheme();
+  renderAll(true);
+  route();
+})();
+</script>
+</body>
+</html>
